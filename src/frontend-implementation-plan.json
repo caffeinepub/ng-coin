@@ -1,0 +1,50 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Add Sponsors section with external links on Landing page",
+  "requirements": [
+    {
+      "id": "REQ-22",
+      "summary": "Add a dedicated Sponsors section to the public Landing page listing four sponsors with external website links.",
+      "acceptanceCriteria": [
+        "The Landing page displays a clearly labeled section titled \"Sponsors\" (English).",
+        "The section contains four sponsor entries for: https://www.ngenvironnement.org/ , https://dmc-technologies.fr/ , https://iorga.com/ , https://metadev3.com/ .",
+        "Each sponsor entry includes an external link that opens in a new tab and uses rel=\"noopener noreferrer\".",
+        "All sponsor URLs match the user-provided URLs exactly (including scheme/host/path)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/landing/SponsorsSection.tsx",
+          "operation": "create",
+          "description": "Create a reusable Landing-page Sponsors section that renders 4 sponsor entries and uses the existing external-link button pattern (anchor wrapping the existing Button with outline variant and an ExternalLink icon, consistent with frontend/src/pages/PartnersPage.tsx). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/LandingPage.tsx",
+          "operation": "modify",
+          "description": "Wire the new Sponsors section into the Landing page UI as a dedicated, clearly labeled \"Sponsors\" section, ensuring each sponsor entry links exactly to: https://www.ngenvironnement.org/ , https://dmc-technologies.fr/ , https://iorga.com/ , https://metadev3.com/ with target=\"_blank\" and rel=\"noopener noreferrer\". Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "summary": "Standardize sponsor external-link actions to use the \"Learn more\" label and match existing external-link button styling.",
+      "acceptanceCriteria": [
+        "Each sponsor entry has a clearly visible \"Learn more\" action.",
+        "Clicking \"Learn more\" navigates to the sponsor website in a new tab.",
+        "No non-English user-facing text is introduced in the sponsor section."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/landing/SponsorsSection.tsx",
+          "operation": "modify",
+          "description": "Ensure each sponsor entry renders a consistently styled \"Learn more\" action matching the Partners page external link button pattern, including the new-tab behavior and rel=\"noopener noreferrer\". Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/LandingPage.tsx",
+          "operation": "modify",
+          "description": "Confirm the Landing page Sponsors section introduces only English user-facing text (section title \"Sponsors\" and action label \"Learn more\") and that styling aligns with the existing external link button pattern used on the Partners page. Verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
+}

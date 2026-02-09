@@ -1,0 +1,30 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T14:09:10.877Z",
+  "summary": "Sponsors section was added to the Landing page via a new SponsorsSection component, listing four sponsors with \"Learn more\" external links opening in a new tab with rel=\"noopener noreferrer\". Some non-product/meta documentation/state files were also updated though not requested.",
+  "missing_requirements": [],
+  "hallucinated_features": [
+    {
+      "description": "Updated project metadata/state file (project_state.json) even though the request was only to add sponsor links/section on the Landing page.",
+      "reason": "BuildRequest does not ask for updating project state tracking files; this is outside REQ-22/REQ-23 scope.",
+      "evidence": [
+        "project_state.json"
+      ]
+    },
+    {
+      "description": "Updated frontend file summary documentation (frontend-file-summaries.txt) beyond implementing the Landing page sponsors section.",
+      "reason": "BuildRequest does not request modifying documentation/summaries; only the Landing page UI change is specified.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    }
+  ],
+  "confidence": 0.74,
+  "changed_files": [
+    "frontend-file-summaries.txt",
+    "frontend/src/components/landing/SponsorsSection.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "project_state.json"
+  ]
+}

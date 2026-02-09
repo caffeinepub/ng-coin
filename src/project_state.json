@@ -1,0 +1,277 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "Build an Internet Computer (ICP) application called “NG COIN” (using Caffeine) for a community-driven impact project: Internet Identity auth, strict admin/user roles, onboarding, private+public user profiles with admin validation, points system, community live chat/guestbook, events with RSVP and counters, partners page, and a private admin dashboard; data stored on ICP canisters with strict access controls.",
+  "architectural_notes": [
+    "Frontend separated from backend; single backend canister for logic/data (initially).",
+    "Authentication via Internet Identity; enforce permissions in every backend method (admin vs user).",
+    "Persist application state in stable variables; validate inputs before writes.",
+    "Admin identified by a specific ICP Principal ID; admin-only routes/methods must be strictly protected."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-implement-internet-identity-authentication-and-session-handling-so-users-can-sign-in-out-and-the-ui-consistently-reflects-authentication-state",
+      "title": "Implement Internet Identity authentication and session handling so users can sign in/out and the UI consistently reflects authentication state.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-mandatory-onboarding-flow-page-in-english-explaining-the-ng-coin-project-global-vision-and-community-values-require-internet-identity-login-to-complete-onboarding-and-unlock-community-access",
+      "title": "Create a mandatory onboarding flow/page in English explaining the NG COIN project, global vision, and community values; require Internet Identity login to complete onboarding and unlock community access.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-private-user-profile-data-model-visible-only-to-the-user-and-admin-with-the-specified-fields-and-crud-capabilities-for-the-user-enforce-backend-access-control-so-only-the-owner-and-admin-can-read-write-private-profile-data",
+      "title": "Implement private user profile data model (visible only to the user and admin) with the specified fields and CRUD capabilities for the user; enforce backend access control so only the owner and admin can read/write private profile data.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-award-500-points-exactly-once-when-a-user-completes-the-private-profile-define-and-implement-a-clear-complete-rule-and-show-the-points-total-on-the-user-profile-page",
+      "title": "Award 500 points exactly once when a user completes the private profile (define and implement a clear ‘complete’ rule) and show the points total on the user profile page.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-public-profile-data-model-managed-by-the-admin-public-biography-company-name-website-link-social-links-services-offered-and-expose-public-profiles-only-for-users-approved-by-the-admin",
+      "title": "Implement public profile data model managed by the admin (public biography, company name, website link, social links, services offered) and expose public profiles only for users approved by the admin.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-admin-validated-status-per-user-profile-with-validate-unvalidate-actions-award-1000-points-exactly-once-when-a-profile-is-validated-by-the-admin-display-validated-status-badge-in-the-community-directory-and-profile-views",
+      "title": "Implement admin “Validated” status per user profile with validate/unvalidate actions; award 1000 points exactly once when a profile is validated by the admin; display validated status badge in the community directory and profile views.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-community-access-rules-only-logged-in-users-who-completed-onboarding-can-view-the-full-community-profiles-directory-and-individual-public-profiles",
+      "title": "Implement community access rules: only logged-in users who completed onboarding can view the full community profiles directory and individual public profiles.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-community-points-system-on-the-backend-using-the-specified-rules-and-make-points-visible-on-user-profile-and-an-optional-community-leaderboard",
+      "title": "Implement a community points system on the backend using the specified rules and make points visible on user profile and an optional community leaderboard.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-community-chat-live-guestbook-where-logged-in-users-can-post-messages-award-50-points-per-posted-message-provide-a-clean-simple-live-interface-that-updates-frequently-polling-based-and-supports-admin-moderation-remove-hide-messages",
+      "title": "Build a community chat / live guestbook where logged-in users can post messages; award 50 points per posted message; provide a clean, simple ‘live’ interface that updates frequently (polling-based) and supports admin moderation (remove/hide messages).",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-voting-mechanism-available-only-to-logged-in-users-define-voting-target-within-the-app-e-g-upvote-downvote-on-chat-messages-award-50-points-per-vote-under-clear-constraints-and-show-vote-counts-in-the-ui",
+      "title": "Implement a voting mechanism available only to logged-in users (define voting target within the app, e.g., upvote/downvote on chat messages), award 50 points per vote under clear constraints, and show vote counts in the UI.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-events-management-admin-can-create-and-manage-events-title-description-date-time-location-online-physical-users-can-rsvp-i-will-participate-or-i-will-not-participate-each-event-page-shows-a-live-participation-counter-yes-no-counts-updated-frequently",
+      "title": "Implement events management: admin can create and manage events (title, description, date & time, location online/physical); users can RSVP “I will participate” or “I will not participate”; each event page shows a live participation counter (yes/no counts) updated frequently.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-partners-page-with-4-partner-cards-each-containing-a-logo-image-a-short-description-english-and-an-external-website-link-for-https-www-dmc-technologies-fr-https-www-ngenvironnement-org-https-iorga-com-http-metadev3-com",
+      "title": "Create a Partners page with 4 partner cards, each containing a logo image, a short description (English), and an external website link, for: https://www.dmc-technologies.fr, https://www.ngenvironnement.org, https://iorga.com, http://metadev3.com.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-private-admin-dashboard-ui-accessible-only-to-the-admin-principal-to-validate-unvalidate-profiles-edit-public-profile-content-create-manage-events-moderate-chat-messages-and-view-community-statistics-users-messages-events-points",
+      "title": "Implement a private Admin Dashboard UI (accessible only to the admin principal) to: validate/unvalidate profiles, edit public profile content, create/manage events, moderate chat messages, and view community statistics (users, messages, events, points).",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-consistent-clean-modern-mobile-first-visual-theme-across-the-app-in-english-with-community-oriented-layout-clear-icons-intuitive-navigation-and-no-complex-web3-terminology-choose-a-distinct-style-that-does-not-rely-on-blue-purple-as-the-primary-palette",
+      "title": "Apply a consistent, clean, modern, mobile-first visual theme across the app in English, with community-oriented layout, clear icons, intuitive navigation, and no complex Web3 terminology; choose a distinct style that does not rely on blue/purple as the primary palette.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-generated-static-image-assets-app-logo-partner-logos-into-the-frontend-and-render-them-in-the-ui-e-g-header-onboarding-for-app-logo-partners-page-for-partner-logos-without-serving-images-through-the-backend",
+      "title": "Add generated static image assets (app logo + partner logos) into the frontend and render them in the UI (e.g., header/onboarding for app logo; Partners page for partner logos) without serving images through the backend.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-community-directory-participant-cards-to-include-clear-learn-more-links-for-each-participant-including-1-an-internal-link-to-the-participant-s-detailed-public-profile-page-and-2-when-available-a-direct-external-link-to-the-participant-s-website",
+      "title": "Update the Community Directory participant cards to include clear “Learn more” links for each participant, including: (1) an internal link to the participant’s detailed public profile page, and (2) when available, a direct external link to the participant’s website.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-participant-public-profile-detail-page-make-all-available-participant-links-actionable-so-users-can-easily-learn-more-render-the-website-as-an-external-link-button-and-render-social-links-as-clickable-external-links-whenever-they-contain-valid-url-s",
+      "title": "On the participant public profile detail page, make all available participant links actionable so users can easily learn more: render the website as an external link button and render social links as clickable external links whenever they contain valid URL(s).",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-partners-page-uses-consistent-learn-more-language-by-presenting-the-existing-external-website-action-as-a-learn-more-link-button-for-each-partner",
+      "title": "Ensure the Partners page uses consistent “Learn more” language by presenting the existing external website action as a “Learn more” link/button for each partner.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-dedicated-sponsors-section-to-the-public-landing-page-frontend-src-pages-landingpage-tsx-that-lists-the-four-sponsors-and-provides-external-website-links-for-each-sponsor",
+      "title": "Add a dedicated \"Sponsors\" section to the public Landing page (frontend/src/pages/LandingPage.tsx) that lists the four sponsors and provides external website links for each sponsor.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-use-consistent-external-link-ui-language-for-sponsor-website-actions-by-labeling-each-sponsor-website-action-as-learn-more-english-and-styling-it-consistently-with-existing-external-link-buttons-e-g-the-partners-page-external-link-button-pattern",
+      "title": "Use consistent external-link UI language for sponsor website actions by labeling each sponsor website action as \"Learn more\" (English) and styling it consistently with existing external link buttons (e.g., the Partners page external link button pattern).",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "ICP app foundation (Caffeine) with Internet Identity authentication and role-based access (single admin by Principal ID, users by ICP identity)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Mandatory onboarding flow/page explaining project vision and values; users must connect ICP identity to join",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "User profiles: private profile (user+admin only) with required fields; public profile managed/published by admin; admin can set \"Validated\" status; logged-in users can view full public profiles",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Community points/score system with defined rules (registration, profile completion, chat posting, voting, admin validation) and display on profile plus optional leaderboard",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Community chat / live guestbook (public feed for logged-in users) with real-time/simple UI, message posting, moderation, and points for posting",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Events management: admin creates events (title, description, date/time, location); users RSVP yes/no; show live participation counters",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Partners page with partner cards (logo, short description, external link) for DMC Technologies, NG Environnement, Iorga, and Metadev",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Admin dashboard (private): validate/unvalidate profiles, edit public profiles, manage events, moderate chat, view community statistics (users/messages/events/points)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Data & security requirements: users access only own private data; public data visible only after admin approval; strict protection for admin-only routes; store data on ICP canisters",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "UI/UX requirements: English, clean/simple/modern, mobile-first, community-oriented, clear navigation/icons, avoid complex Web3 terminology",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Implement backend role model with a single Admin identified by a configurable ICP Principal ID and enforce strict authorization checks for all admin-only operations.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Implement user registration on first login and award 100 points for registration exactly once per principal.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Store all application data on the ICP canister and enforce security rules in backend methods so: users can only access their own private data; public data is visible only after admin approval; admin-only operations are strictly protected.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Add “learn more” links for all project participants (e.g., from participant cards in the community directory to their detailed public profile and/or external website/social links where available).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Add/ensure sponsor section includes external website links for NG Environnement, DMC Technologies, Iorga, and Metadev (ngenvironnement.org, dmc-technologies.fr, iorga.com, metadev3.com).",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "NG COIN",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

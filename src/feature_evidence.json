@@ -1,0 +1,47 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-add-a-dedicated-sponsors-section-to-the-public-landing-page-frontend-src-pages-landingpage-tsx-that-lists-the-four-sponsors-and-provides-external-website-links-for-each-sponsor",
+      "featureTitle": "Add a dedicated \"Sponsors\" section to the public Landing page (frontend/src/pages/LandingPage.tsx) that lists the four sponsors and provides external website links for each sponsor.",
+      "files": [
+        "frontend/src/components/landing/SponsorsSection.tsx",
+        "frontend/src/pages/LandingPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-22"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-use-consistent-external-link-ui-language-for-sponsor-website-actions-by-labeling-each-sponsor-website-action-as-learn-more-english-and-styling-it-consistently-with-existing-external-link-buttons-e-g-the-partners-page-external-link-button-pattern",
+      "featureTitle": "Use consistent external-link UI language for sponsor website actions by labeling each sponsor website action as \"Learn more\" (English) and styling it consistently with existing external link buttons (e.g., the Partners page external link button pattern).",
+      "files": [
+        "frontend/src/components/landing/SponsorsSection.tsx",
+        "frontend/src/pages/LandingPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-23"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T14:09:10.880Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 2,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-22",
+        "summary": "Add a dedicated \"Sponsors\" section to the public Landing page (frontend/src/pages/LandingPage.tsx) that lists the four sponsors and provides external website links for each sponsor.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/landing/SponsorsSection.tsx",
+          "frontend/src/pages/LandingPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/landing/SponsorsSection.tsx",
+          "frontend/src/pages/LandingPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-23",
+        "summary": "Use consistent external-link UI language for sponsor website actions by labeling each sponsor website action as \"Learn more\" (English) and styling it consistently with existing external link buttons (e.g., the Partners page external link button pattern).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/landing/SponsorsSection.tsx",
+          "frontend/src/pages/LandingPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/landing/SponsorsSection.tsx",
+          "frontend/src/pages/LandingPage.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/components/landing/SponsorsSection.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

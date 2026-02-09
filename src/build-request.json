@@ -1,0 +1,67 @@
+{
+  "kind": "build_request",
+  "title": "Add external sponsor links in the sponsor section",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-22",
+      "text": "Add a dedicated \"Sponsors\" section to the public Landing page (frontend/src/pages/LandingPage.tsx) that lists the four sponsors and provides external website links for each sponsor.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Add links in sponsor section\nhttps://www.ngenvironnement.org/\nhttps://dmc-technologies.fr/\nhttps://iorga.com/\nhttps://metadev3.com/"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The Landing page displays a clearly labeled section titled \"Sponsors\" (English).",
+        "The section contains four sponsor entries for: https://www.ngenvironnement.org/ , https://dmc-technologies.fr/ , https://iorga.com/ , https://metadev3.com/ .",
+        "Each sponsor entry includes an external link that opens in a new tab and uses rel=\"noopener noreferrer\".",
+        "All sponsor URLs match the user-provided URLs exactly (including scheme/host/path)."
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "text": "Use consistent external-link UI language for sponsor website actions by labeling each sponsor website action as \"Learn more\" (English) and styling it consistently with existing external link buttons (e.g., the Partners page external link button pattern).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Add links in sponsor section\nhttps://www.ngenvironnement.org/\nhttps://dmc-technologies.fr/\nhttps://iorga.com/\nhttps://metadev3.com/"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each sponsor entry has a clearly visible \"Learn more\" action.",
+        "Clicking \"Learn more\" navigates to the sponsor website in a new tab.",
+        "No non-English user-facing text is introduced in the sponsor section."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify files under frontend/src/components/ui (read-only).",
+    "Do not change backend canister logic or data models for this update."
+  ],
+  "nonGoals": [
+    "Do not add or change partner logos or partner descriptions on the Partners page.",
+    "Do not add new sponsors beyond the four URLs provided.",
+    "Do not implement tracking/analytics for sponsor link clicks."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}
