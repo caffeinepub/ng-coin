@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeActor } from './useSafeActor';
-import type { UserProfile } from '../backend';
+import type { PrivateUserProfile } from '../backend';
 
 export function useRegisterUser() {
   const { actor } = useSafeActor();
@@ -37,7 +37,7 @@ export function useSaveCallerUserProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (profile: UserProfile) => {
+    mutationFn: async (profile: PrivateUserProfile) => {
       if (!actor) throw new Error('Actor not available');
       await actor.saveCallerUserProfile(profile);
     },

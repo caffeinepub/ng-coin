@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useInternetIdentity } from './useInternetIdentity';
 import { useSafeActor } from './useSafeActor';
 import { useGetCallerUserProfile } from './useCurrentUserProfile';
+import { useAuthState } from './useAuthState';
 
 /**
  * Watchdog hook that detects when initialization is taking longer than expected.
@@ -9,12 +10,22 @@ import { useGetCallerUserProfile } from './useCurrentUserProfile';
  */
 export function useInitializationWatchdog() {
   const { isInitializing: authInitializing, loginStatus } = useInternetIdentity();
+  const { isAuthenticated } = useAuthState();
   const { isLoading: actorLoading, isError: actorError } = useSafeActor();
-  const { isLoading: profileLoading, isError: profileError } = useGetCallerUserProfile();
+  const { 
+    isLoading: profileLoading, 
+    isError: profileQueryError,
+    data: profileData,
+    isFetched: profileFetched
+  } = useGetCallerUserProfile();
   
   const [authSlow, setAuthSlow] = useState(false);
   const [actorSlow, setActorSlow] = useState(false);
   const [profileSlow, setProfileSlow] = useState(false);
+
+  // Only treat as profile error if query failed AND it's not just "no profile yet"
+  // If profileData is null but no error, that's a valid state (unregistered user)
+  const profileError = profileQueryError && !(profileFetched && profileData === null);
 
   // Auth initialization watchdog (3 seconds)
   useEffect(() => {
@@ -48,21 +59,21 @@ export function useInitializationWatchdog() {
     return () => clearTimeout(timer);
   }, [actorLoading]);
 
-  // Profile loading watchdog (5 seconds)
+  // Profile loading watchdog (5 seconds) - only for authenticated users
   useEffect(() => {
-    if (!profileLoading) {
+    if (!profileLoading || !isAuthenticated) {
       setProfileSlow(false);
       return;
     }
     
     const timer = setTimeout(() => {
-      if (profileLoading) {
+      if (profileLoading && isAuthenticated) {
         setProfileSlow(true);
       }
     }, 5000);
     
     return () => clearTimeout(timer);
-  }, [profileLoading]);
+  }, [profileLoading, isAuthenticated]);
 
   const isAuthError = loginStatus === 'loginError';
   const isSlow = authSlow || actorSlow || profileSlow;
@@ -77,5 +88,6 @@ export function useInitializationWatchdog() {
     authError: isAuthError,
     actorError,
     profileError,
+    isAuthenticated,
   };
 }

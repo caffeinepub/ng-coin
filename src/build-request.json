@@ -1,79 +1,50 @@
 {
   "kind": "build_request",
-  "title": "Fix infinite loading so the app renders and users can access login/onboarding",
-  "priority": "high",
+  "title": "Add admin-only 'Profile Management' menu entry",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-29",
-      "text": "Ensure the application never gets stuck on the full-screen \"Loading...\" spinner before showing any UI (header, Sign In/Sign Out button, and at least the public routes).",
+      "id": "REQ-51",
+      "text": "Add an admin-only navigation menu entry labeled \"Profile Management\" in `frontend/src/components/layout/AppShell.tsx` that is visible to admins (same visibility rules as existing admin items) and navigates directly to the Admin Dashboard profile management area by opening `/admin?tab=profiles`. The entry must appear in both the desktop navigation and the mobile sheet menu, and the active-route highlighting must work when the current URL is `/admin?tab=profiles`.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1",
-          "msg-2"
+          "msg-4"
         ],
         "quotes": [
-          "le chargement ne finit pas",
-          "non rien le site charge avant meme de me laisser voir quelque chose"
+          "je veux dans le menu en tant qu'admin la possibilité d'avoir un menu de gestion des profil"
         ]
       },
       "acceptanceCriteria": [
-        "Opening the site on a fresh session shows UI within a reasonable time (no indefinite full-screen spinner).",
-        "If Internet Identity initialization or backend calls are slow/failing, the user can still see the header and the Sign In button.",
-        "Public pages (e.g., Home, Partners) remain reachable even if authenticated-only data cannot be loaded yet."
-      ]
-    },
-    {
-      "id": "REQ-30",
-      "text": "Make backend actor creation and the call to initialize admin access control non-blocking and fault-tolerant so it cannot indefinitely block app rendering (e.g., do not await a canister call that may hang as part of the actor query resolution).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-2"
-        ],
-        "quotes": [
-          "le chargement ne finit pas",
-          "non rien le site charge avant meme de me laisser voir quelque chose"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The actor query resolves and provides an actor instance even if access-control secret initialization fails or times out.",
-        "Any failure/timeout during access-control initialization is handled (caught) and does not leave React Query stuck fetching indefinitely.",
-        "Authenticated UI can still render and allow navigation to onboarding/profile even if admin initialization fails."
-      ]
-    },
-    {
-      "id": "REQ-31",
-      "text": "Add a user-visible, English error/fallback state when authentication initialization, actor creation, or profile loading fails or takes unusually long, including a clear recovery action (Retry and/or Reload).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-2"
-        ],
-        "quotes": [
-          "le chargement ne finit pas",
-          "non rien le site charge avant meme de me laisser voir quelque chose"
-        ]
-      },
-      "acceptanceCriteria": [
-        "If profile loading fails, the UI shows an English message (not only console logs) and provides a Retry action.",
-        "If initialization takes longer than a defined threshold, the UI shows an English \"taking longer than expected\" message with a Reload action.",
-        "The app never remains in an indefinite loading state without either rendering content or showing an error/fallback."
+        "When signed in as an admin and onboarded, the main navigation shows a clickable \"Profile Management\" entry.",
+        "Clicking \"Profile Management\" navigates to `/admin?tab=profiles` and the Admin Dashboard opens with the \"Profiles\" tab selected.",
+        "The \"Profile Management\" entry is present and tappable in the mobile menu sheet as well as visible in the desktop navigation (consistent with existing menu behavior).",
+        "When the current route is `/admin?tab=profiles`, the \"Profile Management\" menu entry is visually indicated as active.",
+        "Non-admin users never see the \"Profile Management\" menu entry."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts listed as immutable in SYSTEM_CONTEXT). If changes are needed, implement safe alternatives via new wrapper hooks/components or higher-level composition.",
-    "Keep all user-facing text in English."
+    "Frontend user-facing labels must be in English.",
+    "Do not edit any files under `frontend/src/components/ui` (shadcn components are read-only).",
+    "Respect the existing role/onboarding gating logic in `AppShell.tsx` (public vs authenticated-not-onboarded vs onboarded vs admin)."
   ],
   "nonGoals": [
-    "Adding new features beyond fixing the loading/initial-render issue.",
-    "Changing backend schemas or introducing new canisters/services."
+    "Do not change the Admin Dashboard tab structure or add new admin capabilities beyond providing a direct navigation entry to the existing profiles management tab.",
+    "Do not modify backend data models or authorization logic for profiles as part of this request."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

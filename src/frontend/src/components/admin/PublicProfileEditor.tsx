@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { getProfileDisplayName } from '../../utils/profileDisplay';
 import type { PublicProfile } from '../../backend';
 
 export default function PublicProfileEditor() {
@@ -24,6 +25,7 @@ export default function PublicProfileEditor() {
     const updatedProfile: PublicProfile = {
       principal: selectedProfile.principal,
       biography: formData.biography ?? selectedProfile.biography,
+      displayName: formData.displayName ?? selectedProfile.displayName,
       companyName: formData.companyName ?? selectedProfile.companyName,
       website: formData.website ?? selectedProfile.website,
       socialLinks: formData.socialLinks ?? selectedProfile.socialLinks,
@@ -61,7 +63,7 @@ export default function PublicProfileEditor() {
               <SelectContent>
                 {profiles?.map((profile) => (
                   <SelectItem key={profile.principal.toString()} value={profile.principal.toString()}>
-                    {profile.companyName || profile.principal.toString().slice(0, 20)}
+                    {getProfileDisplayName(profile, profile.principal.toString().slice(0, 20))}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -70,6 +72,16 @@ export default function PublicProfileEditor() {
 
           {selectedProfile && (
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="displayName">Display Name</Label>
+                <Input
+                  id="displayName"
+                  value={formData.displayName ?? selectedProfile.displayName}
+                  onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                  placeholder="Public display name"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="companyName">Company Name</Label>
                 <Input
@@ -104,11 +116,12 @@ export default function PublicProfileEditor() {
 
               <div className="space-y-2">
                 <Label htmlFor="socialLinks">Social Links</Label>
-                <Input
+                <Textarea
                   id="socialLinks"
                   value={formData.socialLinks ?? selectedProfile.socialLinks}
                   onChange={(e) => setFormData({ ...formData, socialLinks: e.target.value })}
-                  placeholder="Twitter, LinkedIn, etc."
+                  placeholder="https://twitter.com/handle&#10;https://linkedin.com/in/profile"
+                  rows={3}
                 />
               </div>
 

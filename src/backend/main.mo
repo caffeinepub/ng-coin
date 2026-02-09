@@ -1,35 +1,39 @@
 import Map "mo:core/Map";
 import Set "mo:core/Set";
 import Array "mo:core/Array";
-import Iter "mo:core/Iter";
 import Text "mo:core/Text";
 import Order "mo:core/Order";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import UserApproval "user-approval/approval";
 
+// Upgrade with migration
+
 actor {
   // === Types ===
 
-  public type UserProfile = {
-    // Private profile fields (visible only to owner and admin)
+  public type PrivateUserProfile = {
     fullName : Text;
+    displayName : Text;
     email : Text;
     phone : Text;
     address : Text;
     dateOfBirth : Text;
-    // Metadata
+    website : Text;
+    socialLinks : Text;
     registrationComplete : Bool;
     onboardingComplete : Bool;
     profileComplete : Bool;
     points : Nat;
   };
 
-  type PublicProfile = {
+  public type PublicProfile = {
     principal : Principal;
     biography : Text;
+    displayName : Text;
     companyName : Text;
     website : Text;
     socialLinks : Text;
@@ -69,25 +73,26 @@ actor {
 
   let approvalState = UserApproval.initState(accessControlState);
 
-  let userProfiles = Map.empty<Principal, UserProfile>();
+  let userProfiles = Map.empty<Principal, PrivateUserProfile>();
   let publicProfiles = Map.empty<Principal, PublicProfile>();
   let rsvps = Map.empty<Principal, Map.Map<Nat, Bool>>();
   let events = Map.empty<Nat, Event>();
   var eventIdCounter = 0;
   let chatMessages = Map.empty<Nat, ChatMessage>();
   var messageIdCounter = 0;
-  let messageVotes = Map.empty<Principal, Set.Set<Nat>>(); // Track which messages each user voted on
+  let messageVotes = Map.empty<Principal, Set.Set<Nat>>();
   let registrationBonusAwarded = Set.empty<Principal>();
   let profileCompleteBonusAwarded = Set.empty<Principal>();
   let validationBonusAwarded = Set.empty<Principal>();
 
   // === Helper Functions ===
 
-  func isProfileComplete(profile : UserProfile) : Bool {
-    profile.fullName != "" and 
-    profile.email != "" and 
-    profile.phone != "" and 
-    profile.address != "" and 
+  func isProfileComplete(profile : PrivateUserProfile) : Bool {
+    profile.fullName != "" and
+    profile.displayName != "" and
+    profile.email != "" and
+    profile.phone != "" and
+    profile.address != "" and
     profile.dateOfBirth != "";
   };
 
@@ -148,12 +153,15 @@ actor {
       Runtime.trap("User already registered");
     };
 
-    let newProfile : UserProfile = {
+    let newProfile : PrivateUserProfile = {
       fullName = "";
+      displayName = "";
       email = "";
       phone = "";
       address = "";
       dateOfBirth = "";
+      website = "";
+      socialLinks = "";
       registrationComplete = true;
       onboardingComplete = false;
       profileComplete = false;
@@ -173,12 +181,15 @@ actor {
           Runtime.trap("Onboarding already completed");
         };
 
-        let updatedProfile : UserProfile = {
+        let updatedProfile : PrivateUserProfile = {
           fullName = profile.fullName;
+          displayName = profile.displayName;
           email = profile.email;
           phone = profile.phone;
           address = profile.address;
           dateOfBirth = profile.dateOfBirth;
+          website = profile.website;
+          socialLinks = profile.socialLinks;
           registrationComplete = profile.registrationComplete;
           onboardingComplete = true;
           profileComplete = profile.profileComplete;
@@ -193,42 +204,43 @@ actor {
     };
   };
 
-  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+  public query ({ caller }) func getCallerUserProfile() : async ?PrivateUserProfile {
     if (caller.isAnonymous()) {
       return null;
     };
     userProfiles.get(caller);
   };
 
-  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    // Only owner and admin can view private profile
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?PrivateUserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
     userProfiles.get(user);
   };
 
-  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+  public shared ({ caller }) func saveCallerUserProfile(profile : PrivateUserProfile) : async () {
     requireRegistered(caller);
 
     switch (userProfiles.get(caller)) {
       case (?existingProfile) {
         let wasComplete = existingProfile.profileComplete;
         let nowComplete = isProfileComplete(profile);
-        
-        // Award 500 points exactly once when profile becomes complete
+
         var bonusPoints = 0;
         if (not wasComplete and nowComplete and not profileCompleteBonusAwarded.contains(caller)) {
           bonusPoints := 500;
           profileCompleteBonusAwarded.add(caller);
         };
 
-        let updatedProfile : UserProfile = {
+        let updatedProfile : PrivateUserProfile = {
           fullName = profile.fullName;
+          displayName = profile.displayName;
           email = profile.email;
           phone = profile.phone;
           address = profile.address;
           dateOfBirth = profile.dateOfBirth;
+          website = profile.website;
+          socialLinks = profile.socialLinks;
           registrationComplete = existingProfile.registrationComplete;
           onboardingComplete = existingProfile.onboardingComplete;
           profileComplete = nowComplete;
@@ -245,14 +257,24 @@ actor {
 
   // === Public Profile Methods ===
 
+  public shared ({ caller }) func createOrUpdatePublicProfile(profile : PublicProfile) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can manage public profiles");
+    };
+    publicProfiles.add(profile.principal, profile);
+  };
+
   public query ({ caller }) func getPublicProfile(principal : Principal) : async PublicProfile {
-    // Must be logged in and completed onboarding to view public profiles
-    requireOnboardingComplete(caller);
+    // Admins can view any profile without onboarding requirement
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    
+    if (not isAdmin) {
+      requireOnboardingComplete(caller);
+    };
 
     switch (publicProfiles.get(principal)) {
-      case (?profile) { 
-        // Only show profiles that are validated (admin-approved)
-        if (not profile.validated and not AccessControl.isAdmin(accessControlState, caller)) {
+      case (?profile) {
+        if (not profile.validated and not isAdmin) {
           Runtime.trap("Public profile not available");
         };
         profile;
@@ -261,22 +283,17 @@ actor {
     };
   };
 
-  public query ({ caller }) func listPublicProfiles() : async [PublicProfile] {
-    // Must be logged in and completed onboarding to view community directory
-    requireOnboardingComplete(caller);
-
-    // Only show validated profiles (unless caller is admin)
-    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
-    publicProfiles.values().toArray().filter(func(profile) {
-      isAdmin or profile.validated
-    });
+  public query ({ caller }) func getOwnPublicProfile() : async ?PublicProfile {
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Anonymous users cannot access this feature");
+    };
+    publicProfiles.get(caller);
   };
 
-  public shared ({ caller }) func createOrUpdatePublicProfile(profile : PublicProfile) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can manage public profiles");
-    };
-    publicProfiles.add(profile.principal, profile);
+  public query ({ caller }) func listPublicProfilesByValidation(validated : Bool) : async [PublicProfile] {
+    requireOnboardingComplete(caller);
+
+    publicProfiles.values().toArray().filter(func(profile) { profile.validated == validated });
   };
 
   public shared ({ caller }) func setProfileValidation(principal : Principal, validated : Bool) : async () {
@@ -289,6 +306,7 @@ actor {
         let updatedProfile : PublicProfile = {
           principal = profile.principal;
           biography = profile.biography;
+          displayName = profile.displayName;
           companyName = profile.companyName;
           website = profile.website;
           socialLinks = profile.socialLinks;
@@ -298,16 +316,18 @@ actor {
         };
         publicProfiles.add(principal, updatedProfile);
 
-        // Award 1000 points exactly once when profile is validated
         if (validated and not validationBonusAwarded.contains(principal)) {
           switch (userProfiles.get(principal)) {
             case (?userProfile) {
-              let updatedUserProfile : UserProfile = {
+              let updatedUserProfile : PrivateUserProfile = {
                 fullName = userProfile.fullName;
+                displayName = userProfile.displayName;
                 email = userProfile.email;
                 phone = userProfile.phone;
                 address = userProfile.address;
                 dateOfBirth = userProfile.dateOfBirth;
+                website = userProfile.website;
+                socialLinks = userProfile.socialLinks;
                 registrationComplete = userProfile.registrationComplete;
                 onboardingComplete = userProfile.onboardingComplete;
                 profileComplete = userProfile.profileComplete;
@@ -325,10 +345,23 @@ actor {
   };
 
   public query ({ caller }) func countValidatedEvents(principal : Principal) : async Nat {
+    requireOnboardingComplete(caller);
+    
     switch (publicProfiles.get(principal)) {
       case (?profile) { profile.eventsAttended };
       case (null) { Runtime.trap("Public profile not found") };
     };
+  };
+
+  public query ({ caller }) func listPublicProfiles() : async [PublicProfile] {
+    // Check if caller is admin or approved user
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      if (not UserApproval.isApproved(approvalState, caller)) {
+        Runtime.trap("Unauthorized: Only approved users can list all public profiles");
+      };
+    };
+    
+    publicProfiles.values().toArray();
   };
 
   // === Event Management Methods ===
@@ -354,7 +387,7 @@ actor {
   };
 
   public shared ({ caller }) func updateEvent(eventId : Nat, title : Text, description : Text, date : Text, location : Text) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
       Runtime.trap("Unauthorized: Only admins can update events");
     };
 
@@ -384,7 +417,6 @@ actor {
   };
 
   public shared ({ caller }) func rsvpToEvent(eventId : Nat, attending : Bool) : async () {
-    // Only logged-in users who completed onboarding can RSVP
     requireOnboardingComplete(caller);
 
     switch (events.get(eventId)) {
@@ -429,7 +461,6 @@ actor {
   };
 
   public query ({ caller }) func getEvent(eventId : Nat) : async Event {
-    // Must be logged in and completed onboarding to view events
     requireOnboardingComplete(caller);
 
     switch (events.get(eventId)) {
@@ -439,14 +470,12 @@ actor {
   };
 
   public query ({ caller }) func listEvents() : async [Event] {
-    // Must be logged in and completed onboarding to view events
     requireOnboardingComplete(caller);
 
     events.values().toArray();
   };
 
   public query ({ caller }) func getPopularEvents() : async [Event] {
-    // Must be logged in and completed onboarding to view events
     requireOnboardingComplete(caller);
 
     events.values().toArray().sort(Event.compareByRSVPCount);
@@ -455,7 +484,6 @@ actor {
   // === Chat Message Methods ===
 
   public shared ({ caller }) func postMessage(content : Text) : async Nat {
-    // Only logged-in users (not guests/anonymous) can post messages
     requireOnboardingComplete(caller);
 
     let newMessage : ChatMessage = {
@@ -470,15 +498,17 @@ actor {
     let currentId = messageIdCounter;
     messageIdCounter += 1;
 
-    // Award 50 points for posting a message
     switch (userProfiles.get(caller)) {
       case (?profile) {
-        let updatedProfile : UserProfile = {
+        let updatedProfile : PrivateUserProfile = {
           fullName = profile.fullName;
+          displayName = profile.displayName;
           email = profile.email;
           phone = profile.phone;
           address = profile.address;
           dateOfBirth = profile.dateOfBirth;
+          website = profile.website;
+          socialLinks = profile.socialLinks;
           registrationComplete = profile.registrationComplete;
           onboardingComplete = profile.onboardingComplete;
           profileComplete = profile.profileComplete;
@@ -522,14 +552,12 @@ actor {
   };
 
   public query ({ caller }) func getApprovedMessages() : async [ChatMessage] {
-    // Must be logged in and completed onboarding to view messages
     requireOnboardingComplete(caller);
 
     chatMessages.values().toArray().filter(func(msg) { msg.approved });
   };
 
   public query ({ caller }) func getAllMessages() : async [ChatMessage] {
-    // Only admin can view all messages (including unapproved)
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can view all messages");
     };
@@ -538,7 +566,6 @@ actor {
   };
 
   public shared ({ caller }) func voteMessage(messageId : Nat) : async () {
-    // Only logged-in users who completed onboarding can vote
     requireOnboardingComplete(caller);
 
     switch (chatMessages.get(messageId)) {
@@ -547,7 +574,6 @@ actor {
           Runtime.trap("Cannot vote on unapproved message");
         };
 
-        // Check if user already voted on this message
         let userVotes = switch (messageVotes.get(caller)) {
           case (?votes) { votes };
           case (null) { Set.empty<Nat>() };
@@ -557,7 +583,6 @@ actor {
           Runtime.trap("You have already voted on this message");
         };
 
-        // Update message vote count
         let updatedMessage : ChatMessage = {
           id = message.id;
           author = message.author;
@@ -568,19 +593,20 @@ actor {
         };
         chatMessages.add(messageId, updatedMessage);
 
-        // Track that user voted on this message
         userVotes.add(messageId);
         messageVotes.add(caller, userVotes);
 
-        // Award 50 points for voting
         switch (userProfiles.get(caller)) {
           case (?profile) {
-            let updatedProfile : UserProfile = {
+            let updatedProfile : PrivateUserProfile = {
               fullName = profile.fullName;
+              displayName = profile.displayName;
               email = profile.email;
               phone = profile.phone;
               address = profile.address;
               dateOfBirth = profile.dateOfBirth;
+              website = profile.website;
+              socialLinks = profile.socialLinks;
               registrationComplete = profile.registrationComplete;
               onboardingComplete = profile.onboardingComplete;
               profileComplete = profile.profileComplete;
@@ -598,7 +624,6 @@ actor {
   // === Points and Leaderboard ===
 
   public query ({ caller }) func getLeaderboard() : async [(Principal, Nat)] {
-    // Must be logged in and completed onboarding to view leaderboard
     requireOnboardingComplete(caller);
 
     let entries = userProfiles.entries().toArray().map(
@@ -606,7 +631,7 @@ actor {
     );
 
     entries.sort(func(a : (Principal, Nat), b : (Principal, Nat)) : Order.Order {
-      Nat.compare(b.1, a.1) // Sort descending by points
+      Nat.compare(b.1, a.1)
     });
   };
 
@@ -635,3 +660,4 @@ actor {
     };
   };
 };
+

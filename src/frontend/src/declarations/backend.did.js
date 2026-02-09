@@ -15,6 +15,7 @@ export const UserRole = IDL.Variant({
 });
 export const PublicProfile = IDL.Record({
   'principal' : IDL.Principal,
+  'displayName' : IDL.Text,
   'validated' : IDL.Bool,
   'socialLinks' : IDL.Text,
   'biography' : IDL.Text,
@@ -31,11 +32,14 @@ export const ChatMessage = IDL.Record({
   'approved' : IDL.Bool,
   'timestamp' : IDL.Int,
 });
-export const UserProfile = IDL.Record({
+export const PrivateUserProfile = IDL.Record({
+  'displayName' : IDL.Text,
   'dateOfBirth' : IDL.Text,
+  'socialLinks' : IDL.Text,
   'onboardingComplete' : IDL.Bool,
   'fullName' : IDL.Text,
   'email' : IDL.Text,
+  'website' : IDL.Text,
   'address' : IDL.Text,
   'phone' : IDL.Text,
   'registrationComplete' : IDL.Bool,
@@ -76,7 +80,11 @@ export const idlService = IDL.Service({
   'deleteEvent' : IDL.Func([IDL.Nat], [], []),
   'getAllMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
   'getApprovedMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
-  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserProfile' : IDL.Func(
+      [],
+      [IDL.Opt(PrivateUserProfile)],
+      ['query'],
+    ),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getEvent' : IDL.Func([IDL.Nat], [Event], ['query']),
   'getLeaderboard' : IDL.Func(
@@ -84,6 +92,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat))],
       ['query'],
     ),
+  'getOwnPublicProfile' : IDL.Func([], [IDL.Opt(PublicProfile)], ['query']),
   'getPopularEvents' : IDL.Func([], [IDL.Vec(Event)], ['query']),
   'getPublicProfile' : IDL.Func([IDL.Principal], [PublicProfile], ['query']),
   'getStatistics' : IDL.Func(
@@ -100,7 +109,7 @@ export const idlService = IDL.Service({
     ),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
-      [IDL.Opt(UserProfile)],
+      [IDL.Opt(PrivateUserProfile)],
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
@@ -108,12 +117,17 @@ export const idlService = IDL.Service({
   'listApprovals' : IDL.Func([], [IDL.Vec(UserApprovalInfo)], ['query']),
   'listEvents' : IDL.Func([], [IDL.Vec(Event)], ['query']),
   'listPublicProfiles' : IDL.Func([], [IDL.Vec(PublicProfile)], ['query']),
+  'listPublicProfilesByValidation' : IDL.Func(
+      [IDL.Bool],
+      [IDL.Vec(PublicProfile)],
+      ['query'],
+    ),
   'postMessage' : IDL.Func([IDL.Text], [IDL.Nat], []),
   'registerUser' : IDL.Func([], [], []),
   'removeMessage' : IDL.Func([IDL.Nat], [], []),
   'requestApproval' : IDL.Func([], [], []),
   'rsvpToEvent' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
-  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'saveCallerUserProfile' : IDL.Func([PrivateUserProfile], [], []),
   'setApproval' : IDL.Func([IDL.Principal, ApprovalStatus], [], []),
   'setProfileValidation' : IDL.Func([IDL.Principal, IDL.Bool], [], []),
   'updateEvent' : IDL.Func(
@@ -134,6 +148,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const PublicProfile = IDL.Record({
     'principal' : IDL.Principal,
+    'displayName' : IDL.Text,
     'validated' : IDL.Bool,
     'socialLinks' : IDL.Text,
     'biography' : IDL.Text,
@@ -150,11 +165,14 @@ export const idlFactory = ({ IDL }) => {
     'approved' : IDL.Bool,
     'timestamp' : IDL.Int,
   });
-  const UserProfile = IDL.Record({
+  const PrivateUserProfile = IDL.Record({
+    'displayName' : IDL.Text,
     'dateOfBirth' : IDL.Text,
+    'socialLinks' : IDL.Text,
     'onboardingComplete' : IDL.Bool,
     'fullName' : IDL.Text,
     'email' : IDL.Text,
+    'website' : IDL.Text,
     'address' : IDL.Text,
     'phone' : IDL.Text,
     'registrationComplete' : IDL.Bool,
@@ -195,7 +213,11 @@ export const idlFactory = ({ IDL }) => {
     'deleteEvent' : IDL.Func([IDL.Nat], [], []),
     'getAllMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
     'getApprovedMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
-    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserProfile' : IDL.Func(
+        [],
+        [IDL.Opt(PrivateUserProfile)],
+        ['query'],
+      ),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getEvent' : IDL.Func([IDL.Nat], [Event], ['query']),
     'getLeaderboard' : IDL.Func(
@@ -203,6 +225,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat))],
         ['query'],
       ),
+    'getOwnPublicProfile' : IDL.Func([], [IDL.Opt(PublicProfile)], ['query']),
     'getPopularEvents' : IDL.Func([], [IDL.Vec(Event)], ['query']),
     'getPublicProfile' : IDL.Func([IDL.Principal], [PublicProfile], ['query']),
     'getStatistics' : IDL.Func(
@@ -219,7 +242,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
-        [IDL.Opt(UserProfile)],
+        [IDL.Opt(PrivateUserProfile)],
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
@@ -227,12 +250,17 @@ export const idlFactory = ({ IDL }) => {
     'listApprovals' : IDL.Func([], [IDL.Vec(UserApprovalInfo)], ['query']),
     'listEvents' : IDL.Func([], [IDL.Vec(Event)], ['query']),
     'listPublicProfiles' : IDL.Func([], [IDL.Vec(PublicProfile)], ['query']),
+    'listPublicProfilesByValidation' : IDL.Func(
+        [IDL.Bool],
+        [IDL.Vec(PublicProfile)],
+        ['query'],
+      ),
     'postMessage' : IDL.Func([IDL.Text], [IDL.Nat], []),
     'registerUser' : IDL.Func([], [], []),
     'removeMessage' : IDL.Func([IDL.Nat], [], []),
     'requestApproval' : IDL.Func([], [], []),
     'rsvpToEvent' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
-    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'saveCallerUserProfile' : IDL.Func([PrivateUserProfile], [], []),
     'setApproval' : IDL.Func([IDL.Principal, ApprovalStatus], [], []),
     'setProfileValidation' : IDL.Func([IDL.Principal, IDL.Bool], [], []),
     'updateEvent' : IDL.Func(

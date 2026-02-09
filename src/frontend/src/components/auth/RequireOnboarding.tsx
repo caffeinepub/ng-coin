@@ -9,7 +9,11 @@ export default function RequireOnboarding({ children }: { children: ReactNode })
   const { data: userProfile, isLoading, isFetched } = useGetCallerUserProfile();
   const navigate = useNavigate();
 
-  const needsOnboarding = isAuthenticated && isFetched && userProfile && !userProfile.onboardingComplete;
+  // User needs onboarding if:
+  // 1. They are authenticated
+  // 2. Profile query has completed (isFetched)
+  // 3. Either profile is null (not registered) OR onboarding is not complete
+  const needsOnboarding = isAuthenticated && isFetched && (!userProfile || !userProfile.onboardingComplete);
 
   useEffect(() => {
     if (needsOnboarding) {
@@ -17,6 +21,7 @@ export default function RequireOnboarding({ children }: { children: ReactNode })
     }
   }, [needsOnboarding, navigate]);
 
+  // Show loading state while actor is initializing or profile is loading
   if (isLoading || !isFetched) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">

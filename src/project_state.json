@@ -1,19 +1,23 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
+  "projectStateVersion": 27,
   "summary": "Build an Internet Computer (ICP) application called “NG COIN” (using Caffeine) for a community-driven impact project: Internet Identity auth, strict admin/user roles, onboarding, private+public user profiles with admin validation, points system, community live chat/guestbook, events with RSVP and counters, partners page, and a private admin dashboard; data stored on ICP canisters with strict access controls.",
   "architectural_notes": [
     "Frontend separated from backend; single backend canister for logic/data (initially).",
     "Authentication via Internet Identity; enforce permissions in every backend method (admin vs user).",
     "Persist application state in stable variables; validate inputs before writes.",
-    "Admin identified by a specific ICP Principal ID; admin-only routes/methods must be strictly protected."
+    "Admin identified by a specific ICP Principal ID; admin-only routes/methods must be strictly protected.",
+    "Add a per-user account visibility setting (Public vs Private) and enforce it in backend queries that expose public profiles and in frontend navigation/directory visibility.",
+    "Navigation requirement: provide clickable menu entries for all available feature pages, with visibility controlled by auth/onboarding/admin gating so every permitted function is reachable from the UI."
   ],
   "known_issues": [
     "User reports admin dashboard, event creation, and live chat are not visible after login; likely admin principal not configured/recognized and/or feature visibility gated by onboarding/auth state.",
     "Even when logging in with the intended admin identity, the user cannot see any navigation links to reach onboarding or access the gated menus; onboarding/menu entrypoint may be missing or hidden due to gating logic.",
-    "App gets stuck in an infinite loading state before rendering any UI (user cannot see/login to access menus); likely an auth/session initialization, routing, or canister call hang that blocks initial render."
+    "App gets stuck in an infinite loading state before rendering any UI (user cannot see/login to access menus); likely an auth/session initialization, routing, or canister call hang that blocks initial render.",
+    "After deployment (v7), app shows \"Initialization Error: Failed to load your profile. You can still browse public pages\" indicating profile-loading failure during auth/initialization.",
+    "Deployment/build to the network failed; requires retry and investigation of deployment error if it persists."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-implement-internet-identity-authentication-and-session-handling-so-users-can-sign-in-out-and-the-ui-consistently-reflects-authentication-state",
@@ -238,6 +242,134 @@
         "REQ-31"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-investigate-and-fix-the-root-cause-of-the-app-showing-the-initialization-banner-error-state-initialization-error-failed-to-load-your-profile-you-can-still-browse-public-pages-after-sign-in-ensuring-the-caller-profile-query-becomes-reliable-in-production-no-unexpected-query-rejection-trap-no-candid-decoding-errors-and-no-transient-agent-canister-errors-causing-a-permanent-error-state",
+      "title": "Investigate and fix the root cause of the app showing the initialization banner error state: \"Initialization Error\" + \"Failed to load your profile. You can still browse public pages\" after sign-in, ensuring the caller profile query becomes reliable in production (no unexpected query rejection/trap, no candid decoding errors, and no transient agent/canister errors causing a permanent error state).",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-profile-loading-to-clearly-distinguish-between-a-a-legitimate-no-profile-yet-state-unregistered-user-profile-is-null-and-b-a-real-profile-loading-failure-so-that-pages-do-not-show-the-generic-error-text-when-the-user-simply-has-no-profile-yet",
+      "title": "Update frontend profile loading to clearly distinguish between (a) a legitimate \"no profile yet\" state (unregistered user / profile is null) and (b) a real profile-loading failure, so that pages do not show the generic error text when the user simply has no profile yet.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-the-initialization-error-recovery-behavior-so-that-the-global-retry-action-in-the-initializationbanner-reliably-re-attempts-the-specific-failing-initialization-step-s-auth-actor-profile-and-clears-the-banner-when-the-system-recovers",
+      "title": "Improve the initialization error recovery behavior so that the global \"Retry\" action in the InitializationBanner reliably re-attempts the specific failing initialization step(s) (auth/actor/profile) and clears the banner when the system recovers.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-extend-the-private-user-profile-backend-userprofile-to-include-a-user-editable-displayname-field-and-add-private-fields-for-website-and-sociallinks-so-a-user-can-store-their-web-page-link-and-social-network-links",
+      "title": "Extend the private user profile (backend `UserProfile`) to include a user-editable `displayName` field, and add private fields for `website` and `socialLinks` so a user can store their web page link and social network links.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-clearly-differentiate-private-profile-vs-public-profile-in-the-profile-ux-on-frontend-src-pages-myprofilepage-tsx-present-the-user-editable-private-profile-section-as-private-profile-and-add-a-separate-public-profile-section-explaining-it-is-visible-to-other-members-only-when-published-validated-by-an-admin",
+      "title": "Clearly differentiate “Private profile” vs “Public profile” in the profile UX: on `frontend/src/pages/MyProfilePage.tsx`, present the user-editable private profile section as “Private profile” and add a separate “Public profile” section explaining it is visible to other members only when published/validated by an admin.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-a-user-can-view-a-public-profile-summary-for-their-own-account-even-if-it-is-not-validated-yet-to-support-the-private-public-distinction-add-a-backend-query-to-fetch-the-caller-s-own-public-profile-without-requiring-validation-and-render-it-read-only-in-the-public-profile-section-on-the-my-profile-page-when-available",
+      "title": "Ensure a user can view a “Public profile” summary for their own account even if it is not validated yet, to support the private/public distinction. Add a backend query to fetch the caller’s own public profile without requiring validation, and render it read-only in the “Public profile” section on the My Profile page when available.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-display-name-appear-in-public-facing-profile-views-wherever-a-person-name-is-presented-use-the-public-profile-s-display-name-if-present-as-the-primary-title-fallback-in-the-community-directory-and-the-public-profile-detail-page-instead-of-showing-only-company-name-or-a-generic-label",
+      "title": "Make “Display name” appear in public-facing profile views wherever a person/name is presented: use the public profile’s display name (if present) as the primary title/fallback in the Community Directory and the Public Profile detail page, instead of showing only company name or a generic label.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-public-profile-data-model-backend-publicprofile-and-the-admin-public-profile-editor-ui-to-support-a-displayname-field-so-admins-can-set-what-is-shown-publicly-if-needed",
+      "title": "Update the public profile data model (backend `PublicProfile`) and the admin Public Profile Editor UI to support a `displayName` field, so admins can set what is shown publicly if needed.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-user-controlled-account-visibility-setting-so-each-authenticated-user-can-choose-whether-their-account-is-public-or-private-and-persist-this-choice-in-the-backend-private-profile-state",
+      "title": "Add a user-controlled account visibility setting so each authenticated user can choose whether their account is Public or Private, and persist this choice in the backend private profile state.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-a-dedicated-admin-certification-validation-area-in-the-admin-ui-so-the-administrator-can-certify-uncertify-users-clearly-from-a-single-explicit-admin-section",
+      "title": "Provide a dedicated admin certification (validation) area in the admin UI so the administrator can certify/uncertify users clearly from a single, explicit admin section.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-live-guestbook-so-it-displays-messages-from-all-registered-onboarded-users-who-post-a-message-not-only-a-subset-while-keeping-admin-moderation-removal-capability",
+      "title": "Update the live guestbook so it displays messages from all registered/onboarded users who post a message (not only a subset), while keeping admin moderation/removal capability.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-re-run-the-full-project-build-and-internet-computer-deployment-and-if-deployment-fails-again-identify-the-exact-failing-step-frontend-build-motoko-compile-candid-generation-asset-bundling-or-canister-install-upgrade-and-fix-the-underlying-cause-so-the-deployment-completes-successfully",
+      "title": "Re-run the full project build and Internet Computer deployment, and if deployment fails again, identify the exact failing step (frontend build, Motoko compile, candid generation, asset bundling, or canister install/upgrade) and fix the underlying cause so the deployment completes successfully.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-adjust-build-time-safeguards-so-that-common-deployment-blockers-are-caught-with-clear-actionable-error-output-for-example-typescript-compilation-errors-motoko-compiler-errors-and-candid-interface-mismatches-without-changing-the-application-s-runtime-user-facing-behavior",
+      "title": "Add/adjust build-time safeguards so that common deployment blockers are caught with clear, actionable error output (for example: TypeScript compilation errors, Motoko compiler errors, and candid/interface mismatches), without changing the application’s runtime user-facing behavior.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-main-app-navigation-in-frontend-src-components-layout-appshell-tsx-so-that-every-feature-page-that-is-available-to-the-current-user-state-is-reachable-via-an-explicit-clearly-clickable-menu-entry-not-only-via-redirects-or-hidden-routes-the-menu-must-adapt-by-role-state-public-not-signed-in-show-clickable-entries-for-at-least-home-and-partners-authenticated-but-not-onboarded-show-a-prominent-clickable-entry-complete-onboarding-link-to-onboarding-plus-the-public-entries-authenticated-onboarded-show-clickable-entries-for-all-community-pages-community-community-live-guestbook-chat-events-events-points-leaderboard-my-profile-profile-plus-public-entries-admin-in-addition-to-the-above-show-a-clickable-admin-dashboard-entry-admin-and-a-clickable-create-event-entry-that-opens-admin-tab-events-user-facing-labels-must-be-in-english",
+      "title": "Update the main app navigation in `frontend/src/components/layout/AppShell.tsx` so that every feature/page that is available to the current user state is reachable via an explicit, clearly clickable menu entry (not only via redirects or hidden routes). The menu must adapt by role/state:\n- Public (not signed in): show clickable entries for at least \"Home\" and \"Partners\".\n- Authenticated but not onboarded: show a prominent clickable entry \"Complete Onboarding\" (link to `/onboarding`) plus the public entries.\n- Authenticated + onboarded: show clickable entries for all community pages: \"Community\" (`/community`), \"Live Guestbook\" (`/chat`), \"Events\" (`/events`), \"Points\" (`/leaderboard`), \"My Profile\" (`/profile`), plus public entries.\n- Admin (in addition to the above): show a clickable \"Admin Dashboard\" entry (`/admin`) and a clickable \"Create Event\" entry that opens `/admin?tab=events`.\nUser-facing labels must be in English.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-clickable-menu-experience-is-responsive-and-accessible-on-small-screens-all-options-described-in-req-49-must-remain-discoverable-and-tappable-on-mobile-without-relying-on-hover-only-interactions-and-the-current-active-page-should-be-visually-indicated-in-the-menu",
+      "title": "Ensure the clickable menu experience is responsive and accessible on small screens: all options described in REQ-49 must remain discoverable and tappable on mobile without relying on hover-only interactions, and the current active page should be visually indicated in the menu.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-admin-only-navigation-menu-entry-labeled-profile-management-in-frontend-src-components-layout-appshell-tsx-that-is-visible-to-admins-same-visibility-rules-as-existing-admin-items-and-navigates-directly-to-the-admin-dashboard-profile-management-area-by-opening-admin-tab-profiles-the-entry-must-appear-in-both-the-desktop-navigation-and-the-mobile-sheet-menu-and-the-active-route-highlighting-must-work-when-the-current-url-is-admin-tab-profiles",
+      "title": "Add an admin-only navigation menu entry labeled \"Profile Management\" in `frontend/src/components/layout/AppShell.tsx` that is visible to admins (same visibility rules as existing admin items) and navigates directly to the Admin Dashboard profile management area by opening `/admin?tab=profiles`. The entry must appear in both the desktop navigation and the mobile sheet menu, and the active-route highlighting must work when the current URL is `/admin?tab=profiles`.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -352,6 +484,62 @@
     {
       "id": "AR-32",
       "summary": "Add a visible navigation/menu link to access the Onboarding flow from the main menu (especially for logged-in users who have not completed onboarding), so users/admin can reach onboarding and then unlock other menus.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Update profile UX/data model to clearly differentiate Private vs Public profile sections, add a user-facing Display Name field, and ensure social network links + website link fields are available and shown appropriately.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Update the private-profile completion rule so it remains well-defined after adding the new fields: keep the existing required fields for completion (do not make website/social links required unless explicitly specified).",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Add upgrade safety for existing deployed data when changing profile record types: implement conditional migration so existing stored profiles continue to load with sensible defaults for newly added fields.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-41",
+      "summary": "Add an explicit user choice of account visibility: user selects whether their account/public presence is Public or Private (opt-in public account), with UI + backend rules reflecting this choice.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-43",
+      "summary": "Enforce account visibility rules across community-visible public profile access: users who choose a Private account must not appear in community public listings and must not have a community-viewable public profile page, while still allowing the owner and admin to view/manage their data where appropriate.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "Add upgrade safety for the new account visibility field so existing deployed user profiles continue to decode/load correctly after upgrade (conditional migration as needed).",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-49",
+      "summary": "Create clearly clickable navigation/menu entries for every available app option (feature) appropriate to the user’s role/state (public, authenticated, onboarded, admin) so all functions are reachable via the UI.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-51",
+      "summary": "Add an admin-only navigation/menu entry for “Profile management” that takes the admin directly to the profile management area (validate/unvalidate users, edit public profiles) in the Admin Dashboard.",
       "reqIds": [],
       "status": "pending"
     }

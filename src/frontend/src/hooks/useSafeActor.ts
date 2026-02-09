@@ -48,7 +48,11 @@ export function useSafeActor() {
       }
     },
     enabled: !isInitializing,
-    retry: 1,
+    retry: (failureCount, error: any) => {
+      // Retry transient errors up to 2 times
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
     staleTime: Infinity,
     gcTime: Infinity,
   });
@@ -59,5 +63,6 @@ export function useSafeActor() {
     isFetching: query.isFetching,
     isError: query.isError,
     error: query.error,
+    refetch: query.refetch,
   };
 }

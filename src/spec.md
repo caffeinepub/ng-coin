@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Prevent the app from getting stuck on the full-screen “Loading...” state so users can quickly see the main UI and access login/onboarding, even when auth/actor/profile initialization is slow or failing.
+**Goal:** Add an admin-only navigation entry for direct access to the Admin Dashboard’s profile management tab.
 
 **Planned changes:**
-- Ensure initial app shell (header + Sign In/Sign Out controls) renders without waiting on authentication, actor creation, or profile/admin initialization.
-- Make actor creation and admin access-control initialization non-blocking and fault-tolerant (timeouts/catches) so React Query cannot hang indefinitely.
-- Add user-visible English fallback/error states for long/failed initialization (e.g., “taking longer than expected”) with clear recovery actions (Retry and/or Reload).
-- Keep public routes (e.g., Home, Partners) reachable regardless of authenticated-only initialization status.
+- Update `frontend/src/components/layout/AppShell.tsx` to include a new admin-only menu item labeled “Profile Management” that routes to `/admin?tab=profiles`.
+- Ensure the “Profile Management” entry appears in both the desktop navigation and the mobile sheet menu, following existing admin visibility/onboarding gating rules.
+- Update active-route highlighting logic so the “Profile Management” entry is shown as active when the current URL is `/admin?tab=profiles`.
 
-**User-visible outcome:** Visiting the site shows the header and public pages promptly; if login/actor/profile setup is slow or fails, users see an English message with Retry/Reload instead of an infinite loading spinner and can still navigate to login/onboarding.
+**User-visible outcome:** Admin users see a “Profile Management” option in the main navigation (desktop and mobile) that opens the Admin Dashboard with the Profiles tab selected; non-admin users do not see this option.

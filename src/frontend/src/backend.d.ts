@@ -13,6 +13,7 @@ export interface UserApprovalInfo {
 }
 export interface PublicProfile {
     principal: Principal;
+    displayName: string;
     validated: boolean;
     socialLinks: string;
     biography: string;
@@ -20,6 +21,20 @@ export interface PublicProfile {
     website: string;
     companyName: string;
     servicesOffered: string;
+}
+export interface PrivateUserProfile {
+    displayName: string;
+    dateOfBirth: string;
+    socialLinks: string;
+    onboardingComplete: boolean;
+    fullName: string;
+    email: string;
+    website: string;
+    address: string;
+    phone: string;
+    registrationComplete: boolean;
+    profileComplete: boolean;
+    points: bigint;
 }
 export interface Event {
     id: bigint;
@@ -37,17 +52,6 @@ export interface ChatMessage {
     author: Principal;
     approved: boolean;
     timestamp: bigint;
-}
-export interface UserProfile {
-    dateOfBirth: string;
-    onboardingComplete: boolean;
-    fullName: string;
-    email: string;
-    address: string;
-    phone: string;
-    registrationComplete: boolean;
-    profileComplete: boolean;
-    points: bigint;
 }
 export enum ApprovalStatus {
     pending = "pending",
@@ -69,10 +73,11 @@ export interface backendInterface {
     deleteEvent(eventId: bigint): Promise<void>;
     getAllMessages(): Promise<Array<ChatMessage>>;
     getApprovedMessages(): Promise<Array<ChatMessage>>;
-    getCallerUserProfile(): Promise<UserProfile | null>;
+    getCallerUserProfile(): Promise<PrivateUserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getEvent(eventId: bigint): Promise<Event>;
     getLeaderboard(): Promise<Array<[Principal, bigint]>>;
+    getOwnPublicProfile(): Promise<PublicProfile | null>;
     getPopularEvents(): Promise<Array<Event>>;
     getPublicProfile(principal: Principal): Promise<PublicProfile>;
     getStatistics(): Promise<{
@@ -81,18 +86,19 @@ export interface backendInterface {
         totalUsers: bigint;
         totalPoints: bigint;
     }>;
-    getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getUserProfile(user: Principal): Promise<PrivateUserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     isCallerApproved(): Promise<boolean>;
     listApprovals(): Promise<Array<UserApprovalInfo>>;
     listEvents(): Promise<Array<Event>>;
     listPublicProfiles(): Promise<Array<PublicProfile>>;
+    listPublicProfilesByValidation(validated: boolean): Promise<Array<PublicProfile>>;
     postMessage(content: string): Promise<bigint>;
     registerUser(): Promise<void>;
     removeMessage(messageId: bigint): Promise<void>;
     requestApproval(): Promise<void>;
     rsvpToEvent(eventId: bigint, attending: boolean): Promise<void>;
-    saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    saveCallerUserProfile(profile: PrivateUserProfile): Promise<void>;
     setApproval(user: Principal, status: ApprovalStatus): Promise<void>;
     setProfileValidation(principal: Principal, validated: boolean): Promise<void>;
     updateEvent(eventId: bigint, title: string, description: string, date: string, location: string): Promise<void>;

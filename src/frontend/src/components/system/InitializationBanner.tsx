@@ -2,6 +2,8 @@ import { AlertCircle, Loader2, RefreshCw, RotateCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSafeActor } from '../../hooks/useSafeActor';
+import { useGetCallerUserProfile } from '../../hooks/useCurrentUserProfile';
 
 interface InitializationBannerProps {
   isSlow: boolean;
@@ -12,6 +14,7 @@ interface InitializationBannerProps {
   authSlow?: boolean;
   actorSlow?: boolean;
   profileSlow?: boolean;
+  isAuthenticated?: boolean;
 }
 
 export function InitializationBanner({
@@ -23,15 +26,29 @@ export function InitializationBanner({
   authSlow,
   actorSlow,
   profileSlow,
+  isAuthenticated,
 }: InitializationBannerProps) {
   const queryClient = useQueryClient();
+  const { refetch: refetchActor } = useSafeActor();
+  const { refetch: refetchProfile } = useGetCallerUserProfile();
 
   if (!isSlow && !hasError) {
     return null;
   }
 
-  const handleRetry = () => {
-    queryClient.invalidateQueries();
+  const handleRetry = async () => {
+    // Targeted retry: refetch the specific failing queries
+    if (actorError) {
+      await refetchActor();
+    }
+    if (profileError && isAuthenticated) {
+      await refetchProfile();
+    }
+    // Also invalidate to ensure fresh data
+    queryClient.invalidateQueries({ queryKey: ['safeActor'] });
+    if (isAuthenticated) {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    }
   };
 
   const handleReload = () => {

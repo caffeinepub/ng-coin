@@ -30,6 +30,19 @@ export function useGetPublicProfile(principalString: string) {
   });
 }
 
+export function useGetOwnPublicProfile() {
+  const { actor, isFetching: actorFetching } = useSafeActor();
+
+  return useQuery<PublicProfile | null>({
+    queryKey: ['ownPublicProfile'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getOwnPublicProfile();
+    },
+    enabled: !!actor && !actorFetching,
+  });
+}
+
 export function useCreateOrUpdatePublicProfile() {
   const { actor } = useSafeActor();
   const queryClient = useQueryClient();
@@ -42,6 +55,7 @@ export function useCreateOrUpdatePublicProfile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['publicProfiles'] });
       queryClient.invalidateQueries({ queryKey: ['publicProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['ownPublicProfile'] });
     },
   });
 }
@@ -58,6 +72,7 @@ export function useSetProfileValidation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['publicProfiles'] });
       queryClient.invalidateQueries({ queryKey: ['publicProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['ownPublicProfile'] });
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
     },
   });

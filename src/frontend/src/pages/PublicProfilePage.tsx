@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Globe, Briefcase, ExternalLink, Calendar, Link as LinkIcon } from 'lucide-react';
 import { extractUrls, getUrlLabel } from '../utils/linkParsing';
+import { getProfileDisplayName, getProfileSecondaryText, getProfileInitial } from '../utils/profileDisplay';
 
 export default function PublicProfilePage() {
   const { principal } = useParams({ from: '/community/$principal' });
@@ -22,41 +23,50 @@ export default function PublicProfilePage() {
 
   if (!profile) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="flex min-h-[40vh] items-center justify-center py-12">
-            <p className="text-muted-foreground">Profile not found</p>
+      <div className="container mx-auto px-4 py-12">
+        <Card className="mx-auto max-w-2xl">
+          <CardContent className="flex min-h-[40vh] flex-col items-center justify-center py-12 text-center">
+            <Globe className="mb-4 h-12 w-12 text-muted-foreground" />
+            <p className="text-lg font-medium text-foreground">Profile not found</p>
+            <p className="text-sm text-muted-foreground">
+              This profile may not exist or is not yet validated
+            </p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Extract valid URLs from social links
-  const socialUrls = profile.socialLinks ? extractUrls(profile.socialLinks) : [];
+  const displayName = getProfileDisplayName(profile);
+  const secondaryText = getProfileSecondaryText(profile);
+  const initial = getProfileInitial(profile);
+  const socialUrls = extractUrls(profile.socialLinks);
 
   return (
     <RequireAuth>
       <RequireOnboarding>
         <div className="container mx-auto px-4 py-8">
-          <div className="mx-auto max-w-3xl space-y-6">
-            {/* Header */}
+          <div className="mx-auto max-w-4xl space-y-6">
+            {/* Profile Header */}
             <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-2xl font-bold text-primary">
-                      {profile.companyName ? profile.companyName.charAt(0).toUpperCase() : '?'}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex gap-4">
+                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-2xl font-bold text-primary">
+                      {initial}
                     </div>
-                    <div>
-                      <CardTitle className="text-2xl">
-                        {profile.companyName || 'Community Member'}
-                      </CardTitle>
-                      {profile.validated && (
-                        <Badge variant="default" className="mt-2 gap-1">
-                          <CheckCircle2 className="h-3 w-3" />
-                          Validated Profile
-                        </Badge>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-2xl">{displayName}</CardTitle>
+                        {profile.validated && (
+                          <Badge variant="default" className="gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Validated
+                          </Badge>
+                        )}
+                      </div>
+                      {secondaryText && (
+                        <p className="text-muted-foreground">{secondaryText}</p>
                       )}
                     </div>
                   </div>
@@ -68,92 +78,85 @@ export default function PublicProfilePage() {
             {profile.biography && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">About</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    About
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{profile.biography}</p>
+                  <p className="whitespace-pre-wrap text-muted-foreground">{profile.biography}</p>
                 </CardContent>
               </Card>
             )}
 
-            {/* Services */}
+            {/* Services Offered */}
             {profile.servicesOffered && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
+                  <CardTitle className="flex items-center gap-2">
                     <Briefcase className="h-5 w-5" />
                     Services Offered
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{profile.servicesOffered}</p>
+                  <p className="whitespace-pre-wrap text-muted-foreground">{profile.servicesOffered}</p>
                 </CardContent>
               </Card>
             )}
 
-            {/* Links */}
-            {(profile.website || profile.socialLinks) && (
+            {/* Links Section */}
+            {(profile.website || socialUrls.length > 0) && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Links</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <LinkIcon className="h-5 w-5" />
+                    Links
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {profile.website && (
+                  {profile.website && profile.website.trim() !== '' && (
                     <a
                       href={profile.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block"
+                      className="flex items-center gap-2 text-primary hover:underline"
                     >
-                      <Button variant="outline" className="w-full justify-start gap-2">
-                        <Globe className="h-4 w-4" />
-                        Website
-                        <ExternalLink className="ml-auto h-4 w-4" />
-                      </Button>
+                      <Globe className="h-4 w-4" />
+                      {profile.website}
+                      <ExternalLink className="h-3 w-3" />
                     </a>
                   )}
-                  {profile.socialLinks && (
-                    <div className="rounded-lg border border-border p-4">
-                      <p className="mb-2 text-sm font-medium text-foreground">Social Media</p>
-                      {socialUrls.length > 0 ? (
-                        <div className="space-y-2">
-                          {socialUrls.map((url, index) => (
-                            <a
-                              key={index}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 text-sm text-primary hover:underline"
-                            >
-                              <LinkIcon className="h-4 w-4" />
-                              {getUrlLabel(url)}
-                              <ExternalLink className="ml-auto h-3 w-3" />
-                            </a>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">{profile.socialLinks}</p>
-                      )}
-                    </div>
-                  )}
+                  {socialUrls.map((url, idx) => (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-primary hover:underline"
+                    >
+                      <LinkIcon className="h-4 w-4" />
+                      {getUrlLabel(url)}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ))}
                 </CardContent>
               </Card>
             )}
 
-            {/* Stats */}
+            {/* Community Activity */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
+                <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
                   Community Activity
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-foreground">
-                    {profile.eventsAttended.toString()}
-                  </span>
-                  <span className="text-sm text-muted-foreground">Events Attended</span>
+                  <Badge variant="secondary" className="text-base">
+                    {Number(profile.eventsAttended)}
+                  </Badge>
+                  <span className="text-muted-foreground">events attended</span>
                 </div>
               </CardContent>
             </Card>

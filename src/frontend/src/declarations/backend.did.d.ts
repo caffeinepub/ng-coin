@@ -30,8 +30,23 @@ export interface Event {
   'rsvpCount' : bigint,
   'location' : string,
 }
+export interface PrivateUserProfile {
+  'displayName' : string,
+  'dateOfBirth' : string,
+  'socialLinks' : string,
+  'onboardingComplete' : boolean,
+  'fullName' : string,
+  'email' : string,
+  'website' : string,
+  'address' : string,
+  'phone' : string,
+  'registrationComplete' : boolean,
+  'profileComplete' : boolean,
+  'points' : bigint,
+}
 export interface PublicProfile {
   'principal' : Principal,
+  'displayName' : string,
   'validated' : boolean,
   'socialLinks' : string,
   'biography' : string,
@@ -43,17 +58,6 @@ export interface PublicProfile {
 export interface UserApprovalInfo {
   'status' : ApprovalStatus,
   'principal' : Principal,
-}
-export interface UserProfile {
-  'dateOfBirth' : string,
-  'onboardingComplete' : boolean,
-  'fullName' : string,
-  'email' : string,
-  'address' : string,
-  'phone' : string,
-  'registrationComplete' : boolean,
-  'profileComplete' : boolean,
-  'points' : bigint,
 }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -69,10 +73,11 @@ export interface _SERVICE {
   'deleteEvent' : ActorMethod<[bigint], undefined>,
   'getAllMessages' : ActorMethod<[], Array<ChatMessage>>,
   'getApprovedMessages' : ActorMethod<[], Array<ChatMessage>>,
-  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [PrivateUserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getEvent' : ActorMethod<[bigint], Event>,
   'getLeaderboard' : ActorMethod<[], Array<[Principal, bigint]>>,
+  'getOwnPublicProfile' : ActorMethod<[], [] | [PublicProfile]>,
   'getPopularEvents' : ActorMethod<[], Array<Event>>,
   'getPublicProfile' : ActorMethod<[Principal], PublicProfile>,
   'getStatistics' : ActorMethod<
@@ -84,18 +89,22 @@ export interface _SERVICE {
       'totalPoints' : bigint,
     }
   >,
-  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [PrivateUserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isCallerApproved' : ActorMethod<[], boolean>,
   'listApprovals' : ActorMethod<[], Array<UserApprovalInfo>>,
   'listEvents' : ActorMethod<[], Array<Event>>,
   'listPublicProfiles' : ActorMethod<[], Array<PublicProfile>>,
+  'listPublicProfilesByValidation' : ActorMethod<
+    [boolean],
+    Array<PublicProfile>
+  >,
   'postMessage' : ActorMethod<[string], bigint>,
   'registerUser' : ActorMethod<[], undefined>,
   'removeMessage' : ActorMethod<[bigint], undefined>,
   'requestApproval' : ActorMethod<[], undefined>,
   'rsvpToEvent' : ActorMethod<[bigint, boolean], undefined>,
-  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[PrivateUserProfile], undefined>,
   'setApproval' : ActorMethod<[Principal, ApprovalStatus], undefined>,
   'setProfileValidation' : ActorMethod<[Principal, boolean], undefined>,
   'updateEvent' : ActorMethod<
