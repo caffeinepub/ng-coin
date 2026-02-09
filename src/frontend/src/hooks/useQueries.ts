@@ -1,9 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSafeActor } from './useSafeActor';
 import type { UserProfile } from '../backend';
 
 export function useRegisterUser() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -18,7 +18,7 @@ export function useRegisterUser() {
 }
 
 export function useCompleteOnboarding() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -33,7 +33,7 @@ export function useCompleteOnboarding() {
 }
 
 export function useSaveCallerUserProfile() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({

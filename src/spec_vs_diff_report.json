@@ -1,52 +1,35 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T15:15:01.274Z",
-  "summary": "AppShell header was updated to render a centered, desktop-only navigation set (including “Chat” and “Events”) gated by an authenticated+onboarded check, with active-route styling. The change also appears to introduce additional header links (e.g., My Profile/Admin) and may inadvertently hide public navigation items for unauthenticated/unonboarded users on desktop due to the top-level gating of the nav.",
-  "missing_requirements": [
-    {
-      "id": "REQ-25",
-      "requirement": "On mobile (sm and below), users can still navigate via the existing bottom navigation behavior.",
-      "reason": "The diff is truncated before showing the mobile/bottom navigation portion of AppShell, so it cannot be verified from the provided evidence that the existing bottom navigation remains present/unchanged on small screens.",
-      "evidence": [
-        "frontend/src/components/layout/AppShell.tsx (truncated)"
-      ]
-    }
-  ],
+  "generatedAt": "2026-02-09T20:21:06.115Z",
+  "summary": "The diff largely implements non-blocking initialization and adds watchdog-driven, user-visible fallback states to prevent indefinite full-screen loading. A new safe actor hook avoids awaiting potentially hanging admin initialization. However, there are some UI/content additions (e.g., points/bonus messaging) that appear unrelated to the loading/initial-render fix and may exceed the stated non-goals.",
+  "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Added additional header navigation items beyond the requested “Events” and “Chat” (e.g., Community, Points, Partners).",
-      "reason": "The BuildRequest only requires adding header links that include at least “Events” (/events) and “Chat” (/chat); adding multiple other primary header links is not explicitly requested.",
+      "description": "Added/expanded profile “Points Summary” UI and bonus/points completion messaging, which is not requested as part of fixing the infinite-loading/initial-render issue.",
+      "reason": "BuildRequest non-goals explicitly say not to add new features beyond fixing loading/initial-render. The diff shows new UI sections and messaging on the profile page that go beyond initialization fault-tolerance and error/slow fallbacks.",
       "evidence": [
-        "frontend/src/components/layout/AppShell.tsx"
-      ]
-    },
-    {
-      "description": "Added a “My Profile” link in the header for onboarded/authenticated users.",
-      "reason": "Not requested by REQ-24/REQ-25 (scope is header links to Events and Chat for discoverability).",
-      "evidence": [
-        "frontend/src/components/layout/AppShell.tsx"
-      ]
-    },
-    {
-      "description": "Potential regression: hides all desktop header navigation (including items marked public like “Home” and “Partners”) unless the user is authenticated and onboarded.",
-      "reason": "The entire desktop nav block is wrapped in `{canAccessCommunity && (...)}`, which prevents rendering any header nav items for unauthenticated/unonboarded users, even though `navItems` includes `public: true` entries.",
-      "evidence": [
-        "frontend/src/components/layout/AppShell.tsx"
-      ]
-    },
-    {
-      "description": "Added an Admin link/section in the header.",
-      "reason": "Not requested by REQ-24/REQ-25.",
-      "evidence": [
-        "frontend/src/components/layout/AppShell.tsx (truncated)"
+        "frontend/src/pages/MyProfilePage.tsx"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.72,
   "changed_files": [
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
     "frontend/src/components/layout/AppShell.tsx",
+    "frontend/src/components/system/InitializationBanner.tsx",
+    "frontend/src/hooks/useAdmin.ts",
+    "frontend/src/hooks/useChat.ts",
+    "frontend/src/hooks/useCurrentUserProfile.ts",
+    "frontend/src/hooks/useEvents.ts",
+    "frontend/src/hooks/useInitializationWatchdog.ts",
+    "frontend/src/hooks/useLeaderboard.ts",
+    "frontend/src/hooks/usePublicProfiles.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useSafeActor.ts",
+    "frontend/src/pages/MyProfilePage.tsx",
+    "frontend/src/pages/OnboardingPage.tsx",
     "project_state.json"
   ]
 }

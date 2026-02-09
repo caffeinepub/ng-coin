@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useSafeActor } from './useSafeActor';
 import type { Event } from '../backend';
 
 export function useListEvents() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useSafeActor();
 
   return useQuery<Event[]>({
     queryKey: ['events'],
@@ -16,7 +16,7 @@ export function useListEvents() {
 }
 
 export function useGetEvent(eventId: string) {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useSafeActor();
 
   return useQuery<Event>({
     queryKey: ['event', eventId],
@@ -25,12 +25,12 @@ export function useGetEvent(eventId: string) {
       return actor.getEvent(BigInt(eventId));
     },
     enabled: !!actor && !actorFetching && !!eventId,
-    refetchInterval: 5000, // Poll for live RSVP counts
+    refetchInterval: 5000,
   });
 }
 
 export function useCreateEvent() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -45,7 +45,7 @@ export function useCreateEvent() {
 }
 
 export function useUpdateEvent() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -61,7 +61,7 @@ export function useUpdateEvent() {
 }
 
 export function useDeleteEvent() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -76,7 +76,7 @@ export function useDeleteEvent() {
 }
 
 export function useRsvpToEvent() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({

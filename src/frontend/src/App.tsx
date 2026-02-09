@@ -1,6 +1,4 @@
 import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
-import { useInternetIdentity } from './hooks/useInternetIdentity';
-import { useGetCallerUserProfile } from './hooks/useCurrentUserProfile';
 import AppShell from './components/layout/AppShell';
 import OnboardingPage from './pages/OnboardingPage';
 import MyProfilePage from './pages/MyProfilePage';
@@ -115,19 +113,5 @@ declare module '@tanstack/react-router' {
 }
 
 export default function App() {
-  const { identity, isInitializing } = useInternetIdentity();
-  const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
-
-  if (isInitializing || (identity && profileLoading && !isFetched)) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return <RouterProvider router={router} />;
 }

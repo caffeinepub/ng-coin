@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useSafeActor } from './useSafeActor';
 import type { ChatMessage } from '../backend';
 
 export function useGetApprovedMessages() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useSafeActor();
 
   return useQuery<ChatMessage[]>({
     queryKey: ['approvedMessages'],
@@ -12,12 +12,12 @@ export function useGetApprovedMessages() {
       return actor.getApprovedMessages();
     },
     enabled: !!actor && !actorFetching,
-    refetchInterval: 5000, // Poll every 5 seconds for "live" feel
+    refetchInterval: 5000,
   });
 }
 
 export function useGetAllMessages() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useSafeActor();
 
   return useQuery<ChatMessage[]>({
     queryKey: ['allMessages'],
@@ -31,7 +31,7 @@ export function useGetAllMessages() {
 }
 
 export function usePostMessage() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -48,7 +48,7 @@ export function usePostMessage() {
 }
 
 export function useVoteMessage() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -65,7 +65,7 @@ export function useVoteMessage() {
 }
 
 export function useApproveMessage() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -81,7 +81,7 @@ export function useApproveMessage() {
 }
 
 export function useRemoveMessage() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({

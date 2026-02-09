@@ -1,37 +1,128 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add authenticated/onboarded header navigation links for Events and Chat",
+  "title": "Eliminate indefinite pre-render loading by making initialization resilient and UI-first",
   "requirements": [
     {
-      "id": "REQ-24",
-      "summary": "Show primary header navigation links (including Events and Chat) for authenticated users who completed onboarding, without changing access rules.",
+      "id": "REQ-29",
+      "summary": "Remove the full-screen pre-render loading gate so the app shell (header + Sign In/Out) and public routes render even if auth/actor/profile data is slow or unavailable.",
       "acceptanceCriteria": [
-        "When a user is authenticated and has completed onboarding, the top header displays navigation links that include at least: “Events” (route: /events) and “Chat” (Community Guestbook; route: /chat).",
-        "The header navigation uses English labels and is visually consistent with the existing navigation styling (active vs inactive state).",
-        "When the user is not authenticated and/or not onboarded, these community navigation links do not appear in the header (current access rules remain unchanged)."
+        "Opening the site on a fresh session shows UI within a reasonable time (no indefinite full-screen spinner).",
+        "If Internet Identity initialization or backend calls are slow/failing, the user can still see the header and the Sign In button.",
+        "Public pages (e.g., Home, Partners) remain reachable even if authenticated-only data cannot be loaded yet."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Remove/relax the top-level full-screen \"Loading...\" gating so RouterProvider renders immediately; ensure any remaining loading UI is non-blocking and does not prevent rendering AppShell + public routes."
+        },
+        {
           "path": "frontend/src/components/layout/AppShell.tsx",
           "operation": "modify",
-          "description": "Add a header (top AppShell) navigation section that renders for canAccessCommunity (authenticated + onboardingComplete) and includes at least links to /events (\"Events\") and /chat (\"Chat\"). Reuse existing nav styling patterns (active vs inactive) already used by the desktop/bottom navigation, and keep labels in English. Ensure links remain hidden when not authenticated and/or not onboarded."
+          "description": "Ensure navigation/header always render regardless of actor/profile readiness; adjust any derived flags to avoid hiding public navigation when profile queries are pending or failed."
+        },
+        {
+          "path": "frontend/src/components/system/InitializationBanner.tsx",
+          "operation": "create",
+          "description": "Add a small, non-blocking banner/callout component to display initialization status (slow/failure) while keeping the app usable; include actions like Reload and Retry. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useInitializationWatchdog.ts",
+          "operation": "create",
+          "description": "Create a small hook that marks initialization as \"taking longer than expected\" after a defined threshold (e.g., auth init, actor creation, profile load), without blocking rendering."
+        },
+        {
+          "path": "frontend/src/components/layout/AppShell.tsx",
+          "operation": "modify",
+          "description": "Wire InitializationBanner into the layout (e.g., below the header) using useInitializationWatchdog + existing auth state so users can always see Sign In and reach public routes. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-25",
-      "summary": "Keep navigation responsive: preserve mobile bottom navigation and show header links on larger screens without breaking existing routes.",
+      "id": "REQ-30",
+      "summary": "Make actor creation and admin access-control initialization non-blocking and fault-tolerant so React Query cannot hang and block rendering.",
       "acceptanceCriteria": [
-        "On mobile (sm and below), users can still navigate via the existing bottom navigation.",
-        "On desktop/tablet (sm and above), the header shows the added navigation links and they correctly route to existing pages.",
-        "No routes are changed; existing pages (/chat, /events, /community, /leaderboard, /partners, /profile, /admin) continue to work as before."
+        "The actor query resolves and provides an actor instance even if access-control secret initialization fails or times out.",
+        "Any failure/timeout during access-control initialization is handled (caught) and does not leave React Query stuck fetching indefinitely.",
+        "Authenticated UI can still render and allow navigation to onboarding/profile even if admin initialization fails."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/hooks/useSafeActor.ts",
+          "operation": "create",
+          "description": "Implement a wrapper hook that creates the backend actor without awaiting long-running admin/access-control initialization; perform any secret-based initialization in a fire-and-forget effect with timeout + error capture so the actor becomes available promptly."
+        },
+        {
+          "path": "frontend/src/hooks/useCurrentUserProfile.ts",
+          "operation": "modify",
+          "description": "Switch from useActor (immutable) to useSafeActor to prevent profile loading from being blocked by access-control initialization; keep queries enabled only when actor is available and authenticated, and ensure failures resolve to an error state rather than infinite fetching."
+        },
+        {
+          "path": "frontend/src/hooks/useAdmin.ts",
+          "operation": "modify",
+          "description": "Switch admin queries to useSafeActor so admin checks/statistics cannot be blocked by access-control initialization; ensure queries handle actor missing/failed states gracefully."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Switch user mutations (registration/onboarding/profile save) to useSafeActor so authenticated flows remain functional even if admin initialization fails; keep errors surfaced to the caller UI rather than hanging."
+        },
+        {
+          "path": "frontend/src/hooks/useChat.ts",
+          "operation": "modify",
+          "description": "Replace useActor usage with useSafeActor so chat queries/mutations do not depend on a potentially hanging access-control initialization; keep public pages unaffected by these queries when unauthenticated."
+        },
+        {
+          "path": "frontend/src/hooks/useEvents.ts",
+          "operation": "modify",
+          "description": "Replace useActor usage with useSafeActor so event queries/mutations cannot hang due to access-control initialization; ensure queries are enabled only when needed and fail fast when actor is unavailable."
+        },
+        {
+          "path": "frontend/src/hooks/usePublicProfiles.ts",
+          "operation": "modify",
+          "description": "Replace useActor usage with useSafeActor so public profile queries/mutations cannot hang; ensure public browsing behavior is resilient even when authenticated-only calls are unavailable."
+        },
+        {
+          "path": "frontend/src/hooks/useLeaderboard.ts",
+          "operation": "modify",
+          "description": "Replace useActor usage with useSafeActor so leaderboard loading cannot hang the app; ensure errors resolve to visible fallback states handled at the page level or via the shared banner."
+        }
+      ]
+    },
+    {
+      "id": "REQ-31",
+      "summary": "Show user-visible English fallback/error states for slow or failed auth initialization, actor creation, or profile loading, with clear recovery actions.",
+      "acceptanceCriteria": [
+        "If profile loading fails, the UI shows an English message (not only console logs) and provides a Retry action.",
+        "If initialization takes longer than a defined threshold, the UI shows an English \"taking longer than expected\" message with a Reload action.",
+        "The app never remains in an indefinite loading state without either rendering content or showing an error/fallback."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/system/InitializationBanner.tsx",
+          "operation": "create",
+          "description": "Implement English messaging for: auth initialization error, actor creation error, access-control init failure (non-fatal), profile load error, and \"taking longer than expected\"; include Retry (refetch/invalidate) and Reload (window reload) actions. Verify the component's usage instructions before implementing."
+        },
+        {
           "path": "frontend/src/components/layout/AppShell.tsx",
           "operation": "modify",
-          "description": "Adjust responsive layout so the added navigation links are visible in the header on sm and above while keeping the existing mobile bottom nav behavior on sm and below. If the existing desktop navigation is removed, do so only by intentionally replacing it with the new header navigation (no route/path changes). Also ensure active-state logic remains correct for nested routes (e.g., event detail under /events) without altering any route definitions."
+          "description": "Display InitializationBanner based on (a) Internet Identity status/errors from useInternetIdentity, (b) actor status/errors from useSafeActor, and (c) profile query error/loading from useGetCallerUserProfile; ensure banner never blocks navigation or public content. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useInitializationWatchdog.ts",
+          "operation": "create",
+          "description": "Add a reusable threshold-based \"taking longer than expected\" signal used by InitializationBanner for auth/actor/profile phases."
+        },
+        {
+          "path": "frontend/src/pages/OnboardingPage.tsx",
+          "operation": "modify",
+          "description": "Ensure onboarding flow handles actor/profile failures by rendering an English error state with a Retry action (using the existing query/mutation refetch mechanisms) rather than leaving the page in a perpetual loading state."
+        },
+        {
+          "path": "frontend/src/pages/MyProfilePage.tsx",
+          "operation": "modify",
+          "description": "Ensure profile page surfaces English load/save errors and offers Retry for loading when actor/profile queries fail, avoiding indefinite spinners."
         }
       ]
     }

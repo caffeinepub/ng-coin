@@ -2,10 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-primary-navigation-links-in-the-top-header-appshell-for-onboarded-authenticated-users-including-direct-links-to-the-existing-events-and-community-guestbook-pages",
-      "featureTitle": "Add primary navigation links in the top header (AppShell) for onboarded, authenticated users, including direct links to the existing Events and Community Guestbook pages.",
+      "featureId": "feature-ensure-the-application-never-gets-stuck-on-the-full-screen-loading-spinner-before-showing-any-ui-header-sign-in-sign-out-button-and-at-least-the-public-routes",
+      "featureTitle": "Ensure the application never gets stuck on the full-screen \"Loading...\" spinner before showing any UI (header, Sign In/Sign Out button, and at least the public routes).",
       "files": [
-        "frontend/src/components/layout/AppShell.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/layout/AppShell.tsx",
+        "frontend/src/components/system/InitializationBanner.tsx",
+        "frontend/src/hooks/useInitializationWatchdog.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,15 +20,22 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-24"
+        "REQ-29"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-header-navigation-remains-responsive-on-small-screens-keep-the-existing-bottom-navigation-behavior-on-larger-screens-header-links-should-be-visible-without-removing-the-existing-desktop-navigation-unless-it-is-intentionally-replaced-by-the-header-links",
-      "featureTitle": "Ensure header navigation remains responsive: on small screens, keep the existing bottom navigation behavior; on larger screens, header links should be visible without removing the existing desktop navigation unless it is intentionally replaced by the header links.",
+      "featureId": "feature-make-backend-actor-creation-and-the-call-to-initialize-admin-access-control-non-blocking-and-fault-tolerant-so-it-cannot-indefinitely-block-app-rendering-e-g-do-not-await-a-canister-call-that-may-hang-as-part-of-the-actor-query-resolution",
+      "featureTitle": "Make backend actor creation and the call to initialize admin access control non-blocking and fault-tolerant so it cannot indefinitely block app rendering (e.g., do not await a canister call that may hang as part of the actor query resolution).",
       "files": [
-        "frontend/src/components/layout/AppShell.tsx"
+        "frontend/src/hooks/useAdmin.ts",
+        "frontend/src/hooks/useChat.ts",
+        "frontend/src/hooks/useCurrentUserProfile.ts",
+        "frontend/src/hooks/useEvents.ts",
+        "frontend/src/hooks/useLeaderboard.ts",
+        "frontend/src/hooks/usePublicProfiles.ts",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useSafeActor.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -37,7 +47,31 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-25"
+        "REQ-30"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-user-visible-english-error-fallback-state-when-authentication-initialization-actor-creation-or-profile-loading-fails-or-takes-unusually-long-including-a-clear-recovery-action-retry-and-or-reload",
+      "featureTitle": "Add a user-visible, English error/fallback state when authentication initialization, actor creation, or profile loading fails or takes unusually long, including a clear recovery action (Retry and/or Reload).",
+      "files": [
+        "frontend/src/components/layout/AppShell.tsx",
+        "frontend/src/components/system/InitializationBanner.tsx",
+        "frontend/src/hooks/useInitializationWatchdog.ts",
+        "frontend/src/pages/MyProfilePage.tsx",
+        "frontend/src/pages/OnboardingPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-31"
       ],
       "confidence": "high"
     }

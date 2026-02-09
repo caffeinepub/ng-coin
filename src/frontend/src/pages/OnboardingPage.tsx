@@ -5,156 +5,226 @@ import { useGetCallerUserProfile } from '../hooks/useCurrentUserProfile';
 import { useRegisterUser, useCompleteOnboarding } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle2, Globe, Users, Heart } from 'lucide-react';
-import { toast } from 'sonner';
-import RequireAuth from '../components/auth/RequireAuth';
+import { CheckCircle2, Globe, Users, Heart, Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function OnboardingPage() {
-  const { isAuthenticated } = useAuthState();
-  const { data: userProfile, isFetched } = useGetCallerUserProfile();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthState();
+  const { data: userProfile, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useGetCallerUserProfile();
   const registerMutation = useRegisterUser();
   const completeMutation = useCompleteOnboarding();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [step, setStep] = useState<'welcome' | 'register' | 'complete'>('welcome');
 
-  const needsRegistration = isAuthenticated && isFetched && !userProfile;
-  const needsOnboarding = isAuthenticated && isFetched && userProfile && !userProfile.onboardingComplete;
+  const isRegistered = userProfile?.registrationComplete;
+  const isOnboarded = userProfile?.onboardingComplete;
+
+  const handleRegister = async () => {
+    try {
+      await registerMutation.mutateAsync();
+      setStep('complete');
+    } catch (error) {
+      console.error('Registration failed:', error);
+    }
+  };
 
   const handleComplete = async () => {
-    setIsProcessing(true);
     try {
-      if (needsRegistration) {
-        await registerMutation.mutateAsync();
-        toast.success('Welcome! Registration complete.');
-      }
-      
       await completeMutation.mutateAsync();
-      toast.success('Onboarding complete! Welcome to NG COIN.');
-      navigate({ to: '/profile' });
+      navigate({ to: '/community' });
     } catch (error) {
-      console.error('Onboarding error:', error);
-      toast.error('Failed to complete onboarding. Please try again.');
-    } finally {
-      setIsProcessing(false);
+      console.error('Onboarding completion failed:', error);
     }
   };
 
   if (!isAuthenticated) {
-    return <RequireAuth><div /></RequireAuth>;
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <Card className="mx-auto max-w-2xl">
+          <CardHeader>
+            <CardTitle>Sign In Required</CardTitle>
+            <CardDescription>Please sign in to access the onboarding process.</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
   }
 
-  if (!needsRegistration && !needsOnboarding) {
+  if (profileLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <Alert variant="destructive" className="mx-auto max-w-2xl">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex flex-col gap-3">
+            <p>Failed to load your profile. Please try again.</p>
+            <Button size="sm" variant="outline" onClick={() => refetchProfile()} className="w-fit">
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (isOnboarded) {
     navigate({ to: '/community' });
     return null;
   }
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="mx-auto max-w-3xl">
-        {/* Hero */}
-        <div className="mb-8 text-center">
-          <img 
-            src="/assets/generated/ng-coin-logo.dim_512x512.png" 
-            alt="NG COIN" 
-            className="mx-auto mb-6 h-24 w-24 rounded-xl shadow-lg"
-          />
-          <h1 className="mb-4 text-4xl font-bold text-foreground">
-            Welcome to NG COIN
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Join our community-driven platform for global impact
-          </p>
-        </div>
-
-        {/* Project Overview */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-primary" />
-              The NG COIN Project
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            <p>
-              NG COIN is a community-driven ICP application created to showcase and support 
-              global impact projects. We are open to everyone and aim to grow through sponsors 
-              and public or private grants.
-            </p>
-            <p>
-              Our platform connects passionate individuals, organizations, and partners who 
-              share a commitment to transparency, engagement, and meaningful change.
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Global Vision */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-primary" />
-              Our Global Vision
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            <p>
-              We envision a world where technology empowers communities to create lasting 
-              positive impact. Through blockchain transparency and collaborative action, 
-              we're building bridges between local initiatives and global support.
-            </p>
-            <p>
-              Every member contributes to this vision—whether through participation, 
-              sharing knowledge, or supporting projects that matter.
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Community Values */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              Community Values
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {[
-                'Transparency: All actions and contributions are visible and verifiable',
-                'Inclusion: Everyone is welcome to participate and contribute',
-                'Engagement: Active participation strengthens our community',
-                'Trust: Built on secure Internet Computer technology',
-                'Impact: Every action contributes to real-world change',
-              ].map((value, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
-                  <span className="text-muted-foreground">{value}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* Complete Button */}
+      <div className="mx-auto max-w-4xl space-y-8">
+        {/* Hero Section */}
         <div className="text-center">
-          <Button 
-            size="lg" 
-            onClick={handleComplete}
-            disabled={isProcessing}
-            className="px-8"
-          >
-            {isProcessing ? (
-              <>
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Processing...
-              </>
-            ) : (
-              'Join the Community'
-            )}
-          </Button>
-          <p className="mt-4 text-sm text-muted-foreground">
-            By joining, you agree to participate respectfully and contribute positively
+          <h1 className="mb-4 text-4xl font-bold text-foreground">Welcome to NG COIN</h1>
+          <p className="text-lg text-muted-foreground">
+            Join our global community building a better future together
           </p>
         </div>
+
+        {/* Mission Cards */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <Globe className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle className="text-lg">Global Vision</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Connect with innovators worldwide working towards sustainable development and positive change.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Users className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle className="text-lg">Community First</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Collaborate, share knowledge, and grow together in a supportive environment.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Heart className="mb-2 h-8 w-8 text-primary" />
+              <CardTitle className="text-lg">Impact Driven</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Every action counts. Earn points and recognition for your contributions to the community.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Onboarding Steps */}
+        <Card className="mx-auto max-w-2xl">
+          <CardHeader>
+            <CardTitle>Get Started</CardTitle>
+            <CardDescription>Complete these steps to join the community</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Step 1: Registration */}
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                {isRegistered ? (
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                ) : (
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-primary text-sm font-bold text-primary">
+                    1
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground">Register Your Account</h3>
+                <p className="text-sm text-muted-foreground">
+                  Create your profile and earn 100 points to get started
+                </p>
+                {!isRegistered && step === 'welcome' && (
+                  <Button
+                    onClick={handleRegister}
+                    disabled={registerMutation.isPending}
+                    className="mt-3"
+                  >
+                    {registerMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Registering...
+                      </>
+                    ) : (
+                      'Register Now'
+                    )}
+                  </Button>
+                )}
+                {registerMutation.isError && (
+                  <Alert variant="destructive" className="mt-3">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Registration failed. Please try again.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </div>
+
+            {/* Step 2: Complete Onboarding */}
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                {isOnboarded ? (
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                ) : (
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-muted-foreground text-sm font-bold text-muted-foreground">
+                    2
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground">Complete Onboarding</h3>
+                <p className="text-sm text-muted-foreground">
+                  Confirm your commitment to our community values
+                </p>
+                {isRegistered && !isOnboarded && (
+                  <Button
+                    onClick={handleComplete}
+                    disabled={completeMutation.isPending}
+                    className="mt-3"
+                  >
+                    {completeMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Completing...
+                      </>
+                    ) : (
+                      'Complete Onboarding'
+                    )}
+                  </Button>
+                )}
+                {completeMutation.isError && (
+                  <Alert variant="destructive" className="mt-3">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Failed to complete onboarding. Please try again.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

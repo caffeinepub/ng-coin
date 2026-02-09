@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useSafeActor } from './useSafeActor';
 import { Principal } from '@dfinity/principal';
 import type { PublicProfile } from '../backend';
 
 export function useListPublicProfiles() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useSafeActor();
 
   return useQuery<PublicProfile[]>({
     queryKey: ['publicProfiles'],
@@ -17,7 +17,7 @@ export function useListPublicProfiles() {
 }
 
 export function useGetPublicProfile(principalString: string) {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useSafeActor();
 
   return useQuery<PublicProfile>({
     queryKey: ['publicProfile', principalString],
@@ -31,7 +31,7 @@ export function useGetPublicProfile(principalString: string) {
 }
 
 export function useCreateOrUpdatePublicProfile() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -47,7 +47,7 @@ export function useCreateOrUpdatePublicProfile() {
 }
 
 export function useSetProfileValidation() {
-  const { actor } = useActor();
+  const { actor } = useSafeActor();
   const queryClient = useQueryClient();
 
   return useMutation({

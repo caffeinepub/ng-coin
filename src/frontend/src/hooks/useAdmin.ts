@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useSafeActor } from './useSafeActor';
 
 export function useIsCallerAdmin() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useSafeActor();
 
   return useQuery<boolean>({
     queryKey: ['isAdmin'],
@@ -15,7 +15,7 @@ export function useIsCallerAdmin() {
 }
 
 export function useGetStatistics() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useSafeActor();
 
   return useQuery<{
     totalUsers: bigint;

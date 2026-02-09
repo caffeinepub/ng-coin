@@ -1,54 +1,76 @@
 {
   "kind": "build_request",
-  "title": "Add header navigation links to Events and Live Guestbook (already implemented)",
-  "priority": "normal",
+  "title": "Fix infinite loading so the app renders and users can access login/onboarding",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-24",
-      "text": "Add primary navigation links in the top header (AppShell) for onboarded, authenticated users, including direct links to the existing Events and Community Guestbook pages.",
+      "id": "REQ-29",
+      "text": "Ensure the application never gets stuck on the full-screen \"Loading...\" spinner before showing any UI (header, Sign In/Sign Out button, and at least the public routes).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1",
+          "msg-2"
         ],
         "quotes": [
-          "il faut ajouter la fonction creation d'évènement et le live guestbook.\nSi c'est déjà le cas : ajoutes les liens en headers"
+          "le chargement ne finit pas",
+          "non rien le site charge avant meme de me laisser voir quelque chose"
         ]
       },
       "acceptanceCriteria": [
-        "When a user is authenticated and has completed onboarding, the top header displays navigation links that include at least: “Events” (route: /events) and “Chat” (Community Guestbook; route: /chat).",
-        "The header navigation uses English labels and is visually consistent with the existing navigation styling (active vs inactive state).",
-        "When the user is not authenticated and/or not onboarded, these community navigation links do not appear in the header (current access rules remain unchanged)."
+        "Opening the site on a fresh session shows UI within a reasonable time (no indefinite full-screen spinner).",
+        "If Internet Identity initialization or backend calls are slow/failing, the user can still see the header and the Sign In button.",
+        "Public pages (e.g., Home, Partners) remain reachable even if authenticated-only data cannot be loaded yet."
       ]
     },
     {
-      "id": "REQ-25",
-      "text": "Ensure header navigation remains responsive: on small screens, keep the existing bottom navigation behavior; on larger screens, header links should be visible without removing the existing desktop navigation unless it is intentionally replaced by the header links.",
+      "id": "REQ-30",
+      "text": "Make backend actor creation and the call to initialize admin access control non-blocking and fault-tolerant so it cannot indefinitely block app rendering (e.g., do not await a canister call that may hang as part of the actor query resolution).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1",
+          "msg-2"
         ],
         "quotes": [
-          "Si c'est déjà le cas : ajoutes les liens en headers"
+          "le chargement ne finit pas",
+          "non rien le site charge avant meme de me laisser voir quelque chose"
         ]
       },
       "acceptanceCriteria": [
-        "On mobile (sm and below), users can still navigate via the existing bottom navigation.",
-        "On desktop/tablet (sm and above), the header shows the added navigation links and they correctly route to existing pages.",
-        "No routes are changed; existing pages (/chat, /events, /community, /leaderboard, /partners, /profile, /admin) continue to work as before."
+        "The actor query resolves and provides an actor instance even if access-control secret initialization fails or times out.",
+        "Any failure/timeout during access-control initialization is handled (caught) and does not leave React Query stuck fetching indefinitely.",
+        "Authenticated UI can still render and allow navigation to onboarding/profile even if admin initialization fails."
+      ]
+    },
+    {
+      "id": "REQ-31",
+      "text": "Add a user-visible, English error/fallback state when authentication initialization, actor creation, or profile loading fails or takes unusually long, including a clear recovery action (Retry and/or Reload).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1",
+          "msg-2"
+        ],
+        "quotes": [
+          "le chargement ne finit pas",
+          "non rien le site charge avant meme de me laisser voir quelque chose"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If profile loading fails, the UI shows an English message (not only console logs) and provides a Retry action.",
+        "If initialization takes longer than a defined threshold, the UI shows an English \"taking longer than expected\" message with a Reload action.",
+        "The app never remains in an indefinite loading state without either rendering content or showing an error/fallback."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (Shadcn components are read-only).",
-    "Do not edit any immutable paths listed in SYSTEM_CONTEXT.frontend.immutablePaths.",
-    "Keep the backend as a single Motoko actor (no architectural changes)."
+    "Do not edit files under frontend/immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts listed as immutable in SYSTEM_CONTEXT). If changes are needed, implement safe alternatives via new wrapper hooks/components or higher-level composition.",
+    "Keep all user-facing text in English."
   ],
   "nonGoals": [
-    "Do not re-implement events creation or the live guestbook/chat features; they already exist.",
-    "Do not add new backend methods or change backend data schemas for this request.",
-    "Do not add new pages or change route paths; only navigation discoverability in the header is in scope."
+    "Adding new features beyond fixing the loading/initial-render issue.",
+    "Changing backend schemas or introducing new canisters/services."
   ],
   "imageRequirements": {
     "required": [],

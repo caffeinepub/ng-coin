@@ -1,36 +1,45 @@
 import { ReactNode } from 'react';
-import { Link, useLocation } from '@tanstack/react-router';
+import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import { useAuthState } from '../../hooks/useAuthState';
 import { useGetCallerUserProfile } from '../../hooks/useCurrentUserProfile';
 import { useIsCallerAdmin } from '../../hooks/useAdmin';
+import { useInitializationWatchdog } from '../../hooks/useInitializationWatchdog';
+import { InitializationBanner } from '../system/InitializationBanner';
 import LoginButton from '../auth/LoginButton';
-import { Home, Users, MessageSquare, Calendar, Award, Handshake, Shield } from 'lucide-react';
+import { Home, Users, MessageSquare, Calendar, Award, Handshake, Shield, Plus, ClipboardCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuthState();
-  const { data: userProfile } = useGetCallerUserProfile();
+  const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
   const { data: isAdmin } = useIsCallerAdmin();
   const location = useLocation();
+  const navigate = useNavigate();
+  
+  const watchdog = useInitializationWatchdog();
 
   const isOnboarded = userProfile?.onboardingComplete;
   const canAccessCommunity = isAuthenticated && isOnboarded;
+  const needsOnboarding = isAuthenticated && !profileLoading && isFetched && (userProfile === null || !isOnboarded);
 
   const navItems = [
     { to: '/', label: 'Home', icon: Home, public: true },
     { to: '/community', label: 'Community', icon: Users, public: false },
-    { to: '/chat', label: 'Chat', icon: MessageSquare, public: false },
+    { to: '/chat', label: 'Live Guestbook', icon: MessageSquare, public: false },
     { to: '/events', label: 'Events', icon: Calendar, public: false },
     { to: '/leaderboard', label: 'Points', icon: Award, public: false },
     { to: '/partners', label: 'Partners', icon: Handshake, public: true },
   ];
 
-  // Check if current path matches or is a child of the nav item path
   const isActiveRoute = (itemPath: string) => {
     if (itemPath === '/') {
       return location.pathname === '/';
     }
     return location.pathname === itemPath || location.pathname.startsWith(itemPath + '/');
+  };
+
+  const handleCreateEventClick = () => {
+    navigate({ to: '/admin', search: { tab: 'events' } });
   };
 
   return (
@@ -72,7 +81,34 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     </Link>
                   );
                 })}
+                {isAdmin && (
+                  <button
+                    onClick={handleCreateEventClick}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Create Event
+                  </button>
+                )}
               </div>
+            </nav>
+          )}
+
+          {/* Onboarding Link for authenticated but not onboarded users (Desktop) */}
+          {needsOnboarding && (
+            <nav className="hidden flex-1 justify-center sm:flex">
+              <Link
+                to="/onboarding"
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                  isActiveRoute('/onboarding')
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-accent text-foreground hover:bg-accent/80'
+                )}
+              >
+                <ClipboardCheck className="h-4 w-4" />
+                Complete Onboarding
+              </Link>
             </nav>
           )}
 
@@ -99,6 +135,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
+
+      {/* Initialization Banner - Non-blocking status display */}
+      <InitializationBanner
+        isSlow={watchdog.isSlow}
+        hasError={watchdog.hasError}
+        authError={watchdog.authError}
+        actorError={watchdog.actorError}
+        profileError={watchdog.profileError}
+        authSlow={watchdog.authSlow}
+        actorSlow={watchdog.actorSlow}
+        profileSlow={watchdog.profileSlow}
+      />
 
       {/* Main Content */}
       <main className="flex-1">
@@ -130,6 +178,35 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               );
             })}
+            {isAdmin && (
+              <button
+                onClick={handleCreateEventClick}
+                className="flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <Plus className="h-5 w-5" />
+                <span>Create</span>
+              </button>
+            )}
+          </div>
+        </nav>
+      )}
+
+      {/* Bottom Navigation for Onboarding (Mobile) */}
+      {needsOnboarding && (
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background sm:hidden">
+          <div className="flex items-center justify-center px-4 py-3">
+            <Link
+              to="/onboarding"
+              className={cn(
+                'flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-medium transition-colors',
+                isActiveRoute('/onboarding')
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-accent text-foreground hover:bg-accent/80'
+              )}
+            >
+              <ClipboardCheck className="h-5 w-5" />
+              Complete Onboarding
+            </Link>
           </div>
         </nav>
       )}
@@ -137,9 +214,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
       {/* Footer */}
       <footer className="border-t border-border bg-muted/30 py-6 pb-20 sm:pb-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026. Built with <span className="text-primary">♥</span> using{' '}
+          © {new Date().getFullYear()}. Built with <span className="text-primary">♥</span> using{' '}
           <a 
-            href="https://caffeine.ai" 
+            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
             target="_blank" 
             rel="noopener noreferrer"
             className="font-medium text-foreground hover:text-primary transition-colors"

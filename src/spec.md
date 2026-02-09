@@ -1,11 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Add header navigation links for authenticated, onboarded users to quickly access the existing Events and Community Guestbook pages.
+**Goal:** Prevent the app from getting stuck on the full-screen “Loading...” state so users can quickly see the main UI and access login/onboarding, even when auth/actor/profile initialization is slow or failing.
 
 **Planned changes:**
-- Update the top header (AppShell) to show primary navigation links labeled “Events” (/events) and “Chat” (/chat) when the user is authenticated and has completed onboarding.
-- Ensure header links match existing navigation styling, including active vs inactive states.
-- Preserve responsive behavior: keep existing bottom navigation on small screens, and show the added header links on larger screens without changing existing routes or access rules.
+- Ensure initial app shell (header + Sign In/Sign Out controls) renders without waiting on authentication, actor creation, or profile/admin initialization.
+- Make actor creation and admin access-control initialization non-blocking and fault-tolerant (timeouts/catches) so React Query cannot hang indefinitely.
+- Add user-visible English fallback/error states for long/failed initialization (e.g., “taking longer than expected”) with clear recovery actions (Retry and/or Reload).
+- Keep public routes (e.g., Home, Partners) reachable regardless of authenticated-only initialization status.
 
-**User-visible outcome:** On desktop/tablet, onboarded signed-in users see “Events” and “Chat” links in the header that navigate to the existing pages; on mobile, navigation continues to work via the existing bottom navigation, and non-authenticated/non-onboarded users do not see these added header links.
+**User-visible outcome:** Visiting the site shows the header and public pages promptly; if login/actor/profile setup is slow or fails, users see an English message with Retry/Reload instead of an infinite loading spinner and can still navigate to login/onboarding.
