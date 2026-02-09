@@ -1,30 +1,52 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T14:09:10.877Z",
-  "summary": "Sponsors section was added to the Landing page via a new SponsorsSection component, listing four sponsors with \"Learn more\" external links opening in a new tab with rel=\"noopener noreferrer\". Some non-product/meta documentation/state files were also updated though not requested.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-09T15:15:01.274Z",
+  "summary": "AppShell header was updated to render a centered, desktop-only navigation set (including “Chat” and “Events”) gated by an authenticated+onboarded check, with active-route styling. The change also appears to introduce additional header links (e.g., My Profile/Admin) and may inadvertently hide public navigation items for unauthenticated/unonboarded users on desktop due to the top-level gating of the nav.",
+  "missing_requirements": [
     {
-      "description": "Updated project metadata/state file (project_state.json) even though the request was only to add sponsor links/section on the Landing page.",
-      "reason": "BuildRequest does not ask for updating project state tracking files; this is outside REQ-22/REQ-23 scope.",
+      "id": "REQ-25",
+      "requirement": "On mobile (sm and below), users can still navigate via the existing bottom navigation behavior.",
+      "reason": "The diff is truncated before showing the mobile/bottom navigation portion of AppShell, so it cannot be verified from the provided evidence that the existing bottom navigation remains present/unchanged on small screens.",
       "evidence": [
-        "project_state.json"
-      ]
-    },
-    {
-      "description": "Updated frontend file summary documentation (frontend-file-summaries.txt) beyond implementing the Landing page sponsors section.",
-      "reason": "BuildRequest does not request modifying documentation/summaries; only the Landing page UI change is specified.",
-      "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend/src/components/layout/AppShell.tsx (truncated)"
       ]
     }
   ],
-  "confidence": 0.74,
+  "hallucinated_features": [
+    {
+      "description": "Added additional header navigation items beyond the requested “Events” and “Chat” (e.g., Community, Points, Partners).",
+      "reason": "The BuildRequest only requires adding header links that include at least “Events” (/events) and “Chat” (/chat); adding multiple other primary header links is not explicitly requested.",
+      "evidence": [
+        "frontend/src/components/layout/AppShell.tsx"
+      ]
+    },
+    {
+      "description": "Added a “My Profile” link in the header for onboarded/authenticated users.",
+      "reason": "Not requested by REQ-24/REQ-25 (scope is header links to Events and Chat for discoverability).",
+      "evidence": [
+        "frontend/src/components/layout/AppShell.tsx"
+      ]
+    },
+    {
+      "description": "Potential regression: hides all desktop header navigation (including items marked public like “Home” and “Partners”) unless the user is authenticated and onboarded.",
+      "reason": "The entire desktop nav block is wrapped in `{canAccessCommunity && (...)}`, which prevents rendering any header nav items for unauthenticated/unonboarded users, even though `navItems` includes `public: true` entries.",
+      "evidence": [
+        "frontend/src/components/layout/AppShell.tsx"
+      ]
+    },
+    {
+      "description": "Added an Admin link/section in the header.",
+      "reason": "Not requested by REQ-24/REQ-25.",
+      "evidence": [
+        "frontend/src/components/layout/AppShell.tsx (truncated)"
+      ]
+    }
+  ],
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/landing/SponsorsSection.tsx",
-    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/components/layout/AppShell.tsx",
     "project_state.json"
   ]
 }

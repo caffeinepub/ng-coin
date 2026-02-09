@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Add a dedicated Sponsors section on the public Landing page with external links to the four provided sponsor websites.
+**Goal:** Add header navigation links for authenticated, onboarded users to quickly access the existing Events and Community Guestbook pages.
 
 **Planned changes:**
-- Add a clearly labeled "Sponsors" section to `frontend/src/pages/LandingPage.tsx`.
-- Display four sponsor entries (NG Environnement, DMC Technologies, Iorga, Metadev) with URLs exactly matching the user-provided links.
-- Add a consistent external-link action labeled "Learn more" for each sponsor, opening in a new tab with `rel="noopener noreferrer"`, styled consistently with the existing external link button pattern (e.g., as used on the Partners page).
+- Update the top header (AppShell) to show primary navigation links labeled “Events” (/events) and “Chat” (/chat) when the user is authenticated and has completed onboarding.
+- Ensure header links match existing navigation styling, including active vs inactive states.
+- Preserve responsive behavior: keep existing bottom navigation on small screens, and show the added header links on larger screens without changing existing routes or access rules.
 
-**User-visible outcome:** Visitors to the Landing page can see a "Sponsors" section and click "Learn more" to open each sponsor’s website in a new browser tab.
+**User-visible outcome:** On desktop/tablet, onboarded signed-in users see “Events” and “Chat” links in the header that navigate to the existing pages; on mobile, navigation continues to work via the existing bottom navigation, and non-authenticated/non-onboarded users do not see these added header links.

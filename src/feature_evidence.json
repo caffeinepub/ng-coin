@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-dedicated-sponsors-section-to-the-public-landing-page-frontend-src-pages-landingpage-tsx-that-lists-the-four-sponsors-and-provides-external-website-links-for-each-sponsor",
-      "featureTitle": "Add a dedicated \"Sponsors\" section to the public Landing page (frontend/src/pages/LandingPage.tsx) that lists the four sponsors and provides external website links for each sponsor.",
+      "featureId": "feature-add-primary-navigation-links-in-the-top-header-appshell-for-onboarded-authenticated-users-including-direct-links-to-the-existing-events-and-community-guestbook-pages",
+      "featureTitle": "Add primary navigation links in the top header (AppShell) for onboarded, authenticated users, including direct links to the existing Events and Community Guestbook pages.",
       "files": [
-        "frontend/src/components/landing/SponsorsSection.tsx",
-        "frontend/src/pages/LandingPage.tsx"
+        "frontend/src/components/layout/AppShell.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,16 +17,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-22"
+        "REQ-24"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-use-consistent-external-link-ui-language-for-sponsor-website-actions-by-labeling-each-sponsor-website-action-as-learn-more-english-and-styling-it-consistently-with-existing-external-link-buttons-e-g-the-partners-page-external-link-button-pattern",
-      "featureTitle": "Use consistent external-link UI language for sponsor website actions by labeling each sponsor website action as \"Learn more\" (English) and styling it consistently with existing external link buttons (e.g., the Partners page external link button pattern).",
+      "featureId": "feature-ensure-header-navigation-remains-responsive-on-small-screens-keep-the-existing-bottom-navigation-behavior-on-larger-screens-header-links-should-be-visible-without-removing-the-existing-desktop-navigation-unless-it-is-intentionally-replaced-by-the-header-links",
+      "featureTitle": "Ensure header navigation remains responsive: on small screens, keep the existing bottom navigation behavior; on larger screens, header links should be visible without removing the existing desktop navigation unless it is intentionally replaced by the header links.",
       "files": [
-        "frontend/src/components/landing/SponsorsSection.tsx",
-        "frontend/src/pages/LandingPage.tsx"
+        "frontend/src/components/layout/AppShell.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -39,7 +37,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-23"
+        "REQ-25"
       ],
       "confidence": "high"
     }

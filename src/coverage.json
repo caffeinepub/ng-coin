@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T14:09:10.880Z",
+  "generatedAt": "2026-02-09T15:15:01.277Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,40 +11,36 @@
     "implemented": 2,
     "items": [
       {
-        "id": "REQ-22",
-        "summary": "Add a dedicated \"Sponsors\" section to the public Landing page (frontend/src/pages/LandingPage.tsx) that lists the four sponsors and provides external website links for each sponsor.",
+        "id": "REQ-24",
+        "summary": "Add primary navigation links in the top header (AppShell) for onboarded, authenticated users, including direct links to the existing Events and Community Guestbook pages.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/landing/SponsorsSection.tsx",
-          "frontend/src/pages/LandingPage.tsx"
+          "frontend/src/components/layout/AppShell.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/landing/SponsorsSection.tsx",
-          "frontend/src/pages/LandingPage.tsx"
+          "frontend/src/components/layout/AppShell.tsx"
         ]
       },
       {
-        "id": "REQ-23",
-        "summary": "Use consistent external-link UI language for sponsor website actions by labeling each sponsor website action as \"Learn more\" (English) and styling it consistently with existing external link buttons (e.g., the Partners page external link button pattern).",
+        "id": "REQ-25",
+        "summary": "Ensure header navigation remains responsive: on small screens, keep the existing bottom navigation behavior; on larger screens, header links should be visible without removing the existing desktop navigation unless it is intentionally replaced by the header links.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/landing/SponsorsSection.tsx",
-          "frontend/src/pages/LandingPage.tsx"
+          "frontend/src/components/layout/AppShell.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/landing/SponsorsSection.tsx",
-          "frontend/src/pages/LandingPage.tsx"
+          "frontend/src/components/layout/AppShell.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "build-request.json",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/landing/SponsorsSection.tsx",
-    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/components/layout/AppShell.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,48 +1,37 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add Sponsors section with external links on Landing page",
+  "title": "Add authenticated/onboarded header navigation links for Events and Chat",
   "requirements": [
     {
-      "id": "REQ-22",
-      "summary": "Add a dedicated Sponsors section to the public Landing page listing four sponsors with external website links.",
+      "id": "REQ-24",
+      "summary": "Show primary header navigation links (including Events and Chat) for authenticated users who completed onboarding, without changing access rules.",
       "acceptanceCriteria": [
-        "The Landing page displays a clearly labeled section titled \"Sponsors\" (English).",
-        "The section contains four sponsor entries for: https://www.ngenvironnement.org/ , https://dmc-technologies.fr/ , https://iorga.com/ , https://metadev3.com/ .",
-        "Each sponsor entry includes an external link that opens in a new tab and uses rel=\"noopener noreferrer\".",
-        "All sponsor URLs match the user-provided URLs exactly (including scheme/host/path)."
+        "When a user is authenticated and has completed onboarding, the top header displays navigation links that include at least: “Events” (route: /events) and “Chat” (Community Guestbook; route: /chat).",
+        "The header navigation uses English labels and is visually consistent with the existing navigation styling (active vs inactive state).",
+        "When the user is not authenticated and/or not onboarded, these community navigation links do not appear in the header (current access rules remain unchanged)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/landing/SponsorsSection.tsx",
-          "operation": "create",
-          "description": "Create a reusable Landing-page Sponsors section that renders 4 sponsor entries and uses the existing external-link button pattern (anchor wrapping the existing Button with outline variant and an ExternalLink icon, consistent with frontend/src/pages/PartnersPage.tsx). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/LandingPage.tsx",
+          "path": "frontend/src/components/layout/AppShell.tsx",
           "operation": "modify",
-          "description": "Wire the new Sponsors section into the Landing page UI as a dedicated, clearly labeled \"Sponsors\" section, ensuring each sponsor entry links exactly to: https://www.ngenvironnement.org/ , https://dmc-technologies.fr/ , https://iorga.com/ , https://metadev3.com/ with target=\"_blank\" and rel=\"noopener noreferrer\". Verify the component's usage instructions before implementing."
+          "description": "Add a header (top AppShell) navigation section that renders for canAccessCommunity (authenticated + onboardingComplete) and includes at least links to /events (\"Events\") and /chat (\"Chat\"). Reuse existing nav styling patterns (active vs inactive) already used by the desktop/bottom navigation, and keep labels in English. Ensure links remain hidden when not authenticated and/or not onboarded."
         }
       ]
     },
     {
-      "id": "REQ-23",
-      "summary": "Standardize sponsor external-link actions to use the \"Learn more\" label and match existing external-link button styling.",
+      "id": "REQ-25",
+      "summary": "Keep navigation responsive: preserve mobile bottom navigation and show header links on larger screens without breaking existing routes.",
       "acceptanceCriteria": [
-        "Each sponsor entry has a clearly visible \"Learn more\" action.",
-        "Clicking \"Learn more\" navigates to the sponsor website in a new tab.",
-        "No non-English user-facing text is introduced in the sponsor section."
+        "On mobile (sm and below), users can still navigate via the existing bottom navigation.",
+        "On desktop/tablet (sm and above), the header shows the added navigation links and they correctly route to existing pages.",
+        "No routes are changed; existing pages (/chat, /events, /community, /leaderboard, /partners, /profile, /admin) continue to work as before."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/landing/SponsorsSection.tsx",
+          "path": "frontend/src/components/layout/AppShell.tsx",
           "operation": "modify",
-          "description": "Ensure each sponsor entry renders a consistently styled \"Learn more\" action matching the Partners page external link button pattern, including the new-tab behavior and rel=\"noopener noreferrer\". Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/LandingPage.tsx",
-          "operation": "modify",
-          "description": "Confirm the Landing page Sponsors section introduces only English user-facing text (section title \"Sponsors\" and action label \"Learn more\") and that styling aligns with the existing external link button pattern used on the Partners page. Verify the component's usage instructions before implementing."
+          "description": "Adjust responsive layout so the added navigation links are visible in the header on sm and above while keeping the existing mobile bottom nav behavior on sm and below. If the existing desktop navigation is removed, do so only by intentionally replacing it with the new header navigation (no route/path changes). Also ensure active-state logic remains correct for nested routes (e.g., event detail under /events) without altering any route definitions."
         }
       ]
     }

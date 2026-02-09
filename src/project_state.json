@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
+  "projectStateVersion": 9,
   "summary": "Build an Internet Computer (ICP) application called “NG COIN” (using Caffeine) for a community-driven impact project: Internet Identity auth, strict admin/user roles, onboarding, private+public user profiles with admin validation, points system, community live chat/guestbook, events with RSVP and counters, partners page, and a private admin dashboard; data stored on ICP canisters with strict access controls.",
   "architectural_notes": [
     "Frontend separated from backend; single backend canister for logic/data (initially).",
@@ -170,6 +170,22 @@
         "REQ-23"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-primary-navigation-links-in-the-top-header-appshell-for-onboarded-authenticated-users-including-direct-links-to-the-existing-events-and-community-guestbook-pages",
+      "title": "Add primary navigation links in the top header (AppShell) for onboarded, authenticated users, including direct links to the existing Events and Community Guestbook pages.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-header-navigation-remains-responsive-on-small-screens-keep-the-existing-bottom-navigation-behavior-on-larger-screens-header-links-should-be-visible-without-removing-the-existing-desktop-navigation-unless-it-is-intentionally-replaced-by-the-header-links",
+      "title": "Ensure header navigation remains responsive: on small screens, keep the existing bottom navigation behavior; on larger screens, header links should be visible without removing the existing desktop navigation unless it is intentionally replaced by the header links.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -266,6 +282,12 @@
     {
       "id": "AR-29",
       "summary": "Add/ensure sponsor section includes external website links for NG Environnement, DMC Technologies, Iorga, and Metadev (ngenvironnement.org, dmc-technologies.fr, iorga.com, metadev3.com).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Add navigation links in the app header (e.g., to Events and Live Guestbook pages)",
       "reqIds": [],
       "status": "pending"
     }

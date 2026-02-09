@@ -25,11 +25,19 @@ export default function AppShell({ children }: { children: ReactNode }) {
     { to: '/partners', label: 'Partners', icon: Handshake, public: true },
   ];
 
+  // Check if current path matches or is a child of the nav item path
+  const isActiveRoute = (itemPath: string) => {
+    if (itemPath === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname === itemPath || location.pathname.startsWith(itemPath + '/');
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
           <Link to="/" className="flex items-center gap-3">
             <img 
               src="/assets/generated/ng-coin-logo.dim_512x512.png" 
@@ -39,6 +47,36 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <span className="text-xl font-bold text-foreground">NG COIN</span>
           </Link>
           
+          {/* Desktop Navigation - Center */}
+          {canAccessCommunity && (
+            <nav className="hidden flex-1 justify-center sm:flex">
+              <div className="flex items-center gap-1">
+                {navItems.map((item) => {
+                  if (!item.public && !canAccessCommunity) return null;
+                  const isActive = isActiveRoute(item.to);
+                  const Icon = item.icon;
+                  
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className={cn(
+                        'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </nav>
+          )}
+
+          {/* Right side actions */}
           <div className="flex items-center gap-4">
             {canAccessCommunity && (
               <Link 
@@ -73,7 +111,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <div className="flex items-center justify-around px-2 py-2">
             {navItems.map((item) => {
               if (!item.public && !canAccessCommunity) return null;
-              const isActive = location.pathname === item.to;
+              const isActive = isActiveRoute(item.to);
               const Icon = item.icon;
               
               return (
@@ -92,37 +130,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               );
             })}
-          </div>
-        </nav>
-      )}
-
-      {/* Desktop Navigation */}
-      {canAccessCommunity && (
-        <nav className="hidden border-t border-border bg-background sm:block">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-center gap-1 py-3">
-              {navItems.map((item) => {
-                if (!item.public && !canAccessCommunity) return null;
-                const isActive = location.pathname === item.to;
-                const Icon = item.icon;
-                
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={cn(
-                      'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
           </div>
         </nav>
       )}

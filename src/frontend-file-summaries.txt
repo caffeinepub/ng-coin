@@ -12,7 +12,7 @@
   "frontend/src/components/auth/RequireAuth.tsx": "Authentication guard component that redirects unauthenticated users and displays an access-denied card with sign-in prompt.",
   "frontend/src/components/auth/RequireOnboarding.tsx": "Onboarding guard component that redirects authenticated users who haven't completed onboarding to the onboarding page.",
   "frontend/src/components/auth/RequireAdmin.tsx": "Admin guard component that checks admin status and displays access-denied message for non-admin users.",
-  "frontend/src/components/layout/AppShell.tsx": "Main layout component with header (logo, login button), responsive navigation (bottom nav on mobile, horizontal nav on desktop), and footer with attribution.",
+  "frontend/src/components/layout/AppShell.tsx": "Main layout component with header containing logo, centered navigation links (Events, Chat, Community, etc.) for authenticated/onboarded users on desktop, login button, responsive mobile bottom navigation, and footer with attribution.",
   "frontend/src/pages/LandingPage.tsx": "Public landing page with hero section, feature cards, sponsors section, mission statement, and automatic redirect to onboarding or community for authenticated users.",
   "frontend/src/pages/OnboardingPage.tsx": "Onboarding page explaining NG COIN project, global vision, and community values with registration and onboarding completion flow.",
   "frontend/src/pages/MyProfilePage.tsx": "Private profile page showing points summary, profile completion status, and editable form for all private profile fields with validation.",
