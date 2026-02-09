@@ -5,12 +5,11 @@ import Text "mo:core/Text";
 import Order "mo:core/Order";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
+import Time "mo:core/Time";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import UserApproval "user-approval/approval";
-
-// Upgrade with migration
 
 actor {
   // === Types ===
@@ -267,7 +266,7 @@ actor {
   public query ({ caller }) func getPublicProfile(principal : Principal) : async PublicProfile {
     // Admins can view any profile without onboarding requirement
     let isAdmin = AccessControl.isAdmin(accessControlState, caller);
-    
+
     if (not isAdmin) {
       requireOnboardingComplete(caller);
     };
@@ -346,7 +345,7 @@ actor {
 
   public query ({ caller }) func countValidatedEvents(principal : Principal) : async Nat {
     requireOnboardingComplete(caller);
-    
+
     switch (publicProfiles.get(principal)) {
       case (?profile) { profile.eventsAttended };
       case (null) { Runtime.trap("Public profile not found") };
@@ -360,7 +359,7 @@ actor {
         Runtime.trap("Unauthorized: Only approved users can list all public profiles");
       };
     };
-    
+
     publicProfiles.values().toArray();
   };
 
@@ -491,7 +490,7 @@ actor {
       author = caller;
       content;
       approved = false;
-      timestamp = 0;
+      timestamp = Time.now();
       votes = 0;
     };
     chatMessages.add(messageIdCounter, newMessage);
@@ -544,17 +543,23 @@ actor {
   };
 
   public shared ({ caller }) func removeMessage(messageId : Nat) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can remove messages");
-    };
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
 
-    chatMessages.remove(messageId);
+    switch (chatMessages.get(messageId)) {
+      case (?message) {
+        if (not isAdmin and message.author != caller) {
+          Runtime.trap("Unauthorized: Caller is neither admin nor message author");
+        };
+        chatMessages.remove(messageId);
+      };
+      case (null) { Runtime.trap("Message not found") };
+    };
   };
 
-  public query ({ caller }) func getApprovedMessages() : async [ChatMessage] {
+  public query ({ caller }) func getVisibleMessages() : async [ChatMessage] {
     requireOnboardingComplete(caller);
 
-    chatMessages.values().toArray().filter(func(msg) { msg.approved });
+    chatMessages.values().toArray().filter(func(msg) { msg.approved or msg.author == caller });
   };
 
   public query ({ caller }) func getAllMessages() : async [ChatMessage] {
@@ -660,4 +665,3 @@ actor {
     };
   };
 };
-

@@ -1,23 +1,48 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin-only navigation entry for Profile Management",
+  "title": "Live Guestbook: allow authors to delete their own messages (UI) and keep admin moderation delete working",
   "requirements": [
     {
-      "id": "REQ-51",
-      "summary": "Add an admin-only \"Profile Management\" navigation item in AppShell that links to /admin?tab=profiles, shows in desktop and mobile menus, and is highlighted as active on that URL.",
+      "id": "REQ-56",
+      "summary": "Add an author-only delete control to the Live Guestbook feed that confirms, calls removeMessage, and updates the feed immediately with clear English errors on failure.",
       "acceptanceCriteria": [
-        "When signed in as an admin and onboarded, the main navigation shows a clickable \"Profile Management\" entry.",
-        "Clicking \"Profile Management\" navigates to `/admin?tab=profiles` and the Admin Dashboard opens with the \"Profiles\" tab selected.",
-        "The \"Profile Management\" entry is present and tappable in the mobile menu sheet as well as visible in the desktop navigation (consistent with existing menu behavior).",
-        "When the current route is `/admin?tab=profiles`, the \"Profile Management\" menu entry is visually indicated as active.",
-        "Non-admin users never see the \"Profile Management\" menu entry."
+        "For each message in the guestbook feed, if the current user is the message author, a clearly visible delete button/control is shown.",
+        "Clicking delete asks for confirmation (English) before performing the deletion.",
+        "After a successful delete, the message disappears from the visible feed without requiring a manual page refresh.",
+        "If deletion fails, the user sees an English error toast/message (e.g., 'Failed to delete message. Please try again.')."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/layout/AppShell.tsx",
+          "path": "frontend/src/pages/ChatPage.tsx",
           "operation": "modify",
-          "description": "Add a new admin-only menu item labeled \"Profile Management\" that navigates to `/admin` with `search: { tab: 'profiles' }`, ensuring it is included in the existing admin-gated menu items list (same visibility rules as current admin items). Ensure active-route highlighting works for `/admin?tab=profiles` by leveraging the existing admin+tab matching logic in `isActiveRoute`, and confirm it renders in both desktop navigation and the mobile sheet menu via the existing `visibleMenuItems` mapping. Keep all labels in English and do not modify any files under `frontend/src/components/ui`."
+          "description": "Add a per-message delete button that only renders when the current authenticated user is the message author (compare message.author to the current principal). Use the existing RequireAuth + RequireOnboarding gating and call the existing remove-message mutation with an English confirm dialog; show English success/error feedback via the existing toast system. Use the authorization component’s frontend guidance to derive the current principal/identity for author comparison; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useChat.ts",
+          "operation": "modify",
+          "description": "Enhance the existing useRemoveMessage mutation to update the react-query cache so the deleted message is removed from the visible feed immediately after success (and/or optimistically with rollback on error), while still invalidating/revalidating the relevant message queries."
+        }
+      ]
+    },
+    {
+      "id": "REQ-57",
+      "summary": "Ensure the admin chat moderation panel can still delete any message with the same English confirmation and success/error feedback, and refreshes lists after success.",
+      "acceptanceCriteria": [
+        "An admin can still remove any message via the moderation panel.",
+        "The moderation panel’s delete action continues to refresh the message lists after success.",
+        "No new authorization errors occur for admins when deleting messages."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/admin/ChatModerationPanel.tsx",
+          "operation": "modify",
+          "description": "Verify the moderation panel continues to use the existing remove-message mutation, retains the English confirmation prompt, and provides English success/error toasts. Ensure the UI remains resilient to authorization failures (showing the existing error toast) and that the message list refresh behavior is preserved after successful deletion."
+        },
+        {
+          "path": "frontend/src/hooks/useChat.ts",
+          "operation": "modify",
+          "description": "Ensure any immediate/optimistic cache updates added for removeMessage also work for the admin moderation view (allMessages) so admin deletions reflect promptly and continue to refresh the relevant lists after success."
         }
       ]
     }

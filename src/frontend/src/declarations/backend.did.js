@@ -79,7 +79,6 @@ export const idlService = IDL.Service({
   'createOrUpdatePublicProfile' : IDL.Func([PublicProfile], [], []),
   'deleteEvent' : IDL.Func([IDL.Nat], [], []),
   'getAllMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
-  'getApprovedMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
   'getCallerUserProfile' : IDL.Func(
       [],
       [IDL.Opt(PrivateUserProfile)],
@@ -112,6 +111,7 @@ export const idlService = IDL.Service({
       [IDL.Opt(PrivateUserProfile)],
       ['query'],
     ),
+  'getVisibleMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerApproved' : IDL.Func([], [IDL.Bool], ['query']),
   'listApprovals' : IDL.Func([], [IDL.Vec(UserApprovalInfo)], ['query']),
@@ -212,7 +212,6 @@ export const idlFactory = ({ IDL }) => {
     'createOrUpdatePublicProfile' : IDL.Func([PublicProfile], [], []),
     'deleteEvent' : IDL.Func([IDL.Nat], [], []),
     'getAllMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
-    'getApprovedMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
     'getCallerUserProfile' : IDL.Func(
         [],
         [IDL.Opt(PrivateUserProfile)],
@@ -245,6 +244,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(PrivateUserProfile)],
         ['query'],
       ),
+    'getVisibleMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerApproved' : IDL.Func([], [IDL.Bool], ['query']),
     'listApprovals' : IDL.Func([], [IDL.Vec(UserApprovalInfo)], ['query']),

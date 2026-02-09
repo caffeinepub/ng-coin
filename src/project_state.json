@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 27,
+  "projectStateVersion": 31,
   "summary": "Build an Internet Computer (ICP) application called “NG COIN” (using Caffeine) for a community-driven impact project: Internet Identity auth, strict admin/user roles, onboarding, private+public user profiles with admin validation, points system, community live chat/guestbook, events with RSVP and counters, partners page, and a private admin dashboard; data stored on ICP canisters with strict access controls.",
   "architectural_notes": [
     "Frontend separated from backend; single backend canister for logic/data (initially).",
@@ -15,9 +15,10 @@
     "Even when logging in with the intended admin identity, the user cannot see any navigation links to reach onboarding or access the gated menus; onboarding/menu entrypoint may be missing or hidden due to gating logic.",
     "App gets stuck in an infinite loading state before rendering any UI (user cannot see/login to access menus); likely an auth/session initialization, routing, or canister call hang that blocks initial render.",
     "After deployment (v7), app shows \"Initialization Error: Failed to load your profile. You can still browse public pages\" indicating profile-loading failure during auth/initialization.",
-    "Deployment/build to the network failed; requires retry and investigation of deployment error if it persists."
+    "Deployment/build to the network failed; requires retry and investigation of deployment error if it persists.",
+    "Live Guestbook/chat not functioning: user cannot see sent messages (messages not displaying/refreshing in the feed)."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-implement-internet-identity-authentication-and-session-handling-so-users-can-sign-in-out-and-the-ui-consistently-reflects-authentication-state",
@@ -370,6 +371,38 @@
         "REQ-51"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-make-the-live-guestbook-feed-show-newly-posted-messages-immediately-for-onboarded-users-the-user-who-posts-a-message-must-be-able-to-see-it-appear-in-the-message-list-right-after-posting-without-requiring-an-admin-approval-step",
+      "title": "Make the Live Guestbook feed show newly posted messages immediately for onboarded users (the user who posts a message must be able to see it appear in the message list right after posting, without requiring an admin approval step).",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-adjust-the-frontend-guestbook-page-to-reflect-the-updated-visibility-behavior-after-a-successful-post-the-ui-should-refresh-the-feed-and-show-the-new-message-in-the-list-and-any-user-facing-error-text-related-to-posting-fetching-remains-in-english",
+      "title": "Adjust the frontend guestbook page to reflect the updated visibility behavior: after a successful post, the UI should refresh the feed and show the new message in the list, and any user-facing error text related to posting/fetching remains in English.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-delete-control-to-the-live-guestbook-ui-frontend-src-pages-chatpage-tsx-so-authenticated-onboarded-users-can-delete-their-own-messages-from-the-visible-feed-the-action-must-call-the-existing-remove-message-mutation-and-update-the-feed-immediately-after-success",
+      "title": "Add a delete control to the Live Guestbook UI (`frontend/src/pages/ChatPage.tsx`) so authenticated, onboarded users can delete their own messages from the visible feed; the action must call the existing remove-message mutation and update the feed immediately after success.",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-existing-admin-chat-moderation-ui-frontend-src-components-admin-chatmoderationpanel-tsx-continues-to-support-deleting-any-message-after-the-backend-authorization-change-with-the-same-english-confirmation-and-success-error-feedback",
+      "title": "Ensure the existing admin chat moderation UI (`frontend/src/components/admin/ChatModerationPanel.tsx`) continues to support deleting any message after the backend authorization change, with the same English confirmation and success/error feedback.",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -541,6 +574,28 @@
       "id": "AR-51",
       "summary": "Add an admin-only navigation/menu entry for “Profile management” that takes the admin directly to the profile management area (validate/unvalidate users, edit public profiles) in the Admin Dashboard.",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-53",
+      "summary": "Update the backend chat message persistence and queries to support a reliable public feed: messages returned by the user-facing feed query must include messages that should be visible per REQ-52, and messages should have a meaningful timestamp (not a constant value) so ordering can be consistent.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-54",
+      "summary": "Allow deletion of messages in the Live Guestbook (moderation capability—at least admin-only)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-55",
+      "summary": "Update the backend chat message deletion logic so that a message can be deleted by (a) the admin principal or (b) the original message author; all other callers must be rejected with an English unauthorized error.",
+      "reqIds": [
+        "REQ-55"
+      ],
       "status": "pending"
     }
   ],

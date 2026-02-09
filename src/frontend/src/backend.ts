@@ -155,7 +155,6 @@ export interface backendInterface {
     createOrUpdatePublicProfile(profile: PublicProfile): Promise<void>;
     deleteEvent(eventId: bigint): Promise<void>;
     getAllMessages(): Promise<Array<ChatMessage>>;
-    getApprovedMessages(): Promise<Array<ChatMessage>>;
     getCallerUserProfile(): Promise<PrivateUserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getEvent(eventId: bigint): Promise<Event>;
@@ -170,6 +169,7 @@ export interface backendInterface {
         totalPoints: bigint;
     }>;
     getUserProfile(user: Principal): Promise<PrivateUserProfile | null>;
+    getVisibleMessages(): Promise<Array<ChatMessage>>;
     isCallerAdmin(): Promise<boolean>;
     isCallerApproved(): Promise<boolean>;
     listApprovals(): Promise<Array<UserApprovalInfo>>;
@@ -316,20 +316,6 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getApprovedMessages(): Promise<Array<ChatMessage>> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getApprovedMessages();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getApprovedMessages();
-            return result;
-        }
-    }
     async getCallerUserProfile(): Promise<PrivateUserProfile | null> {
         if (this.processError) {
             try {
@@ -459,6 +445,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getUserProfile(arg0);
             return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getVisibleMessages(): Promise<Array<ChatMessage>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getVisibleMessages();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getVisibleMessages();
+            return result;
         }
     }
     async isCallerAdmin(): Promise<boolean> {

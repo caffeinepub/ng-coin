@@ -72,7 +72,6 @@ export interface backendInterface {
     createOrUpdatePublicProfile(profile: PublicProfile): Promise<void>;
     deleteEvent(eventId: bigint): Promise<void>;
     getAllMessages(): Promise<Array<ChatMessage>>;
-    getApprovedMessages(): Promise<Array<ChatMessage>>;
     getCallerUserProfile(): Promise<PrivateUserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getEvent(eventId: bigint): Promise<Event>;
@@ -87,6 +86,7 @@ export interface backendInterface {
         totalPoints: bigint;
     }>;
     getUserProfile(user: Principal): Promise<PrivateUserProfile | null>;
+    getVisibleMessages(): Promise<Array<ChatMessage>>;
     isCallerAdmin(): Promise<boolean>;
     isCallerApproved(): Promise<boolean>;
     listApprovals(): Promise<Array<UserApprovalInfo>>;

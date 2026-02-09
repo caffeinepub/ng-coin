@@ -1,11 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Add an admin-only navigation entry for direct access to the Admin Dashboard’s profile management tab.
+**Goal:** Allow Live Guestbook messages to be deleted only by the original author or an admin, with clear English confirmations and error feedback.
 
 **Planned changes:**
-- Update `frontend/src/components/layout/AppShell.tsx` to include a new admin-only menu item labeled “Profile Management” that routes to `/admin?tab=profiles`.
-- Ensure the “Profile Management” entry appears in both the desktop navigation and the mobile sheet menu, following existing admin visibility/onboarding gating rules.
-- Update active-route highlighting logic so the “Profile Management” entry is shown as active when the current URL is `/admin?tab=profiles`.
+- Update backend `removeMessage(messageId)` authorization to allow deletion by the admin principal or the message’s original author; reject all other callers with a clear English unauthorized error.
+- Update backend deletion behavior to reject (with a clear English error) when attempting to delete a non-existent message.
+- Add a per-message delete control in `frontend/src/pages/ChatPage.tsx` for authenticated, onboarded users to delete their own messages, including an English confirmation prompt and immediate feed update after success.
+- Ensure `frontend/src/components/admin/ChatModerationPanel.tsx` continues to support admins deleting any message, with the same English confirmation and success/error feedback and list refresh after deletion.
 
-**User-visible outcome:** Admin users see a “Profile Management” option in the main navigation (desktop and mobile) that opens the Admin Dashboard with the Profiles tab selected; non-admin users do not see this option.
+**User-visible outcome:** Users can delete their own guestbook messages from the live feed (with confirmation) and see them disappear immediately; admins can still delete any message via the moderation panel; unauthorized or invalid deletions show clear English errors.

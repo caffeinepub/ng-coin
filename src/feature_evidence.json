@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-an-admin-only-navigation-menu-entry-labeled-profile-management-in-frontend-src-components-layout-appshell-tsx-that-is-visible-to-admins-same-visibility-rules-as-existing-admin-items-and-navigates-directly-to-the-admin-dashboard-profile-management-area-by-opening-admin-tab-profiles-the-entry-must-appear-in-both-the-desktop-navigation-and-the-mobile-sheet-menu-and-the-active-route-highlighting-must-work-when-the-current-url-is-admin-tab-profiles",
-      "featureTitle": "Add an admin-only navigation menu entry labeled \"Profile Management\" in `frontend/src/components/layout/AppShell.tsx` that is visible to admins (same visibility rules as existing admin items) and navigates directly to the Admin Dashboard profile management area by opening `/admin?tab=profiles`. The entry must appear in both the desktop navigation and the mobile sheet menu, and the active-route highlighting must work when the current URL is `/admin?tab=profiles`.",
+      "featureId": "feature-add-a-delete-control-to-the-live-guestbook-ui-frontend-src-pages-chatpage-tsx-so-authenticated-onboarded-users-can-delete-their-own-messages-from-the-visible-feed-the-action-must-call-the-existing-remove-message-mutation-and-update-the-feed-immediately-after-success",
+      "featureTitle": "Add a delete control to the Live Guestbook UI (`frontend/src/pages/ChatPage.tsx`) so authenticated, onboarded users can delete their own messages from the visible feed; the action must call the existing remove-message mutation and update the feed immediately after success.",
       "files": [
-        "frontend/src/components/layout/AppShell.tsx"
+        "frontend/src/hooks/useChat.ts",
+        "frontend/src/pages/ChatPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,7 +18,28 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-51"
+        "REQ-56"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-existing-admin-chat-moderation-ui-frontend-src-components-admin-chatmoderationpanel-tsx-continues-to-support-deleting-any-message-after-the-backend-authorization-change-with-the-same-english-confirmation-and-success-error-feedback",
+      "featureTitle": "Ensure the existing admin chat moderation UI (`frontend/src/components/admin/ChatModerationPanel.tsx`) continues to support deleting any message after the backend authorization change, with the same English confirmation and success/error feedback.",
+      "files": [
+        "frontend/src/components/admin/ChatModerationPanel.tsx",
+        "frontend/src/hooks/useChat.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-57"
       ],
       "confidence": "high"
     }

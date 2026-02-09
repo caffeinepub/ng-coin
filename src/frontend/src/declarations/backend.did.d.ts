@@ -72,7 +72,6 @@ export interface _SERVICE {
   'createOrUpdatePublicProfile' : ActorMethod<[PublicProfile], undefined>,
   'deleteEvent' : ActorMethod<[bigint], undefined>,
   'getAllMessages' : ActorMethod<[], Array<ChatMessage>>,
-  'getApprovedMessages' : ActorMethod<[], Array<ChatMessage>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [PrivateUserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getEvent' : ActorMethod<[bigint], Event>,
@@ -90,6 +89,7 @@ export interface _SERVICE {
     }
   >,
   'getUserProfile' : ActorMethod<[Principal], [] | [PrivateUserProfile]>,
+  'getVisibleMessages' : ActorMethod<[], Array<ChatMessage>>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isCallerApproved' : ActorMethod<[], boolean>,
   'listApprovals' : ActorMethod<[], Array<UserApprovalInfo>>,

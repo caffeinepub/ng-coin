@@ -1,34 +1,59 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T21:32:42.599Z",
+  "generatedAt": "2026-02-09T22:26:16.661Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-51",
-        "summary": "Add an admin-only navigation menu entry labeled \"Profile Management\" in `frontend/src/components/layout/AppShell.tsx` that is visible to admins (same visibility rules as existing admin items) and navigates directly to the Admin Dashboard profile management area by opening `/admin?tab=profiles`. The entry must appear in both the desktop navigation and the mobile sheet menu, and the active-route highlighting must work when the current URL is `/admin?tab=profiles`.",
+        "id": "REQ-55",
+        "summary": "Update the backend chat message deletion logic so that a message can be deleted by (a) the admin principal or (b) the original message author; all other callers must be rejected with an English unauthorized error.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-56",
+        "summary": "Add a delete control to the Live Guestbook UI (`frontend/src/pages/ChatPage.tsx`) so authenticated, onboarded users can delete their own messages from the visible feed; the action must call the existing remove-message mutation and update the feed immediately after success.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/layout/AppShell.tsx"
+          "frontend/src/pages/ChatPage.tsx",
+          "frontend/src/hooks/useChat.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/layout/AppShell.tsx"
+          "frontend/src/pages/ChatPage.tsx",
+          "frontend/src/hooks/useChat.ts"
+        ]
+      },
+      {
+        "id": "REQ-57",
+        "summary": "Ensure the existing admin chat moderation UI (`frontend/src/components/admin/ChatModerationPanel.tsx`) continues to support deleting any message after the backend authorization change, with the same English confirmation and success/error feedback.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/admin/ChatModerationPanel.tsx",
+          "frontend/src/hooks/useChat.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/admin/ChatModerationPanel.tsx",
+          "frontend/src/hooks/useChat.ts"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/layout/AppShell.tsx",
+    "frontend/src/components/admin/ChatModerationPanel.tsx",
+    "frontend/src/hooks/useChat.ts",
+    "frontend/src/pages/ChatPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

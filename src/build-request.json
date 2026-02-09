@@ -1,37 +1,74 @@
 {
   "kind": "build_request",
-  "title": "Add admin-only 'Profile Management' menu entry",
+  "title": "Enable deleting Live Guestbook messages (author + admin)",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-51",
-      "text": "Add an admin-only navigation menu entry labeled \"Profile Management\" in `frontend/src/components/layout/AppShell.tsx` that is visible to admins (same visibility rules as existing admin items) and navigates directly to the Admin Dashboard profile management area by opening `/admin?tab=profiles`. The entry must appear in both the desktop navigation and the mobile sheet menu, and the active-route highlighting must work when the current URL is `/admin?tab=profiles`.",
-      "target": "frontend",
+      "id": "REQ-55",
+      "text": "Update the backend chat message deletion logic so that a message can be deleted by (a) the admin principal or (b) the original message author; all other callers must be rejected with an English unauthorized error.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages"
         ],
         "quotes": [
-          "je veux dans le menu en tant qu'admin la possibilité d'avoir un menu de gestion des profil"
+          "je veux pouvoir supprimer les message dans le live guestbook"
         ]
       },
       "acceptanceCriteria": [
-        "When signed in as an admin and onboarded, the main navigation shows a clickable \"Profile Management\" entry.",
-        "Clicking \"Profile Management\" navigates to `/admin?tab=profiles` and the Admin Dashboard opens with the \"Profiles\" tab selected.",
-        "The \"Profile Management\" entry is present and tappable in the mobile menu sheet as well as visible in the desktop navigation (consistent with existing menu behavior).",
-        "When the current route is `/admin?tab=profiles`, the \"Profile Management\" menu entry is visually indicated as active.",
-        "Non-admin users never see the \"Profile Management\" menu entry."
+        "When the caller is the admin, calling `removeMessage(messageId)` deletes the message.",
+        "When the caller is the original author of the message, calling `removeMessage(messageId)` deletes the message.",
+        "When the caller is neither admin nor the message author, `removeMessage(messageId)` traps/rejects with an English error indicating the action is not allowed.",
+        "Attempting to delete a non-existent message returns a clear English error (trap/reject) rather than silently succeeding."
+      ]
+    },
+    {
+      "id": "REQ-56",
+      "text": "Add a delete control to the Live Guestbook UI (`frontend/src/pages/ChatPage.tsx`) so authenticated, onboarded users can delete their own messages from the visible feed; the action must call the existing remove-message mutation and update the feed immediately after success.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "je veux pouvoir supprimer les message dans le live guestbook"
+        ]
+      },
+      "acceptanceCriteria": [
+        "For each message in the guestbook feed, if the current user is the message author, a clearly visible delete button/control is shown.",
+        "Clicking delete asks for confirmation (English) before performing the deletion.",
+        "After a successful delete, the message disappears from the visible feed without requiring a manual page refresh.",
+        "If deletion fails, the user sees an English error toast/message (e.g., 'Failed to delete message. Please try again.')."
+      ]
+    },
+    {
+      "id": "REQ-57",
+      "text": "Ensure the existing admin chat moderation UI (`frontend/src/components/admin/ChatModerationPanel.tsx`) continues to support deleting any message after the backend authorization change, with the same English confirmation and success/error feedback.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "je veux pouvoir supprimer les message dans le live guestbook"
+        ]
+      },
+      "acceptanceCriteria": [
+        "An admin can still remove any message via the moderation panel.",
+        "The moderation panel’s delete action continues to refresh the message lists after success.",
+        "No new authorization errors occur for admins when deleting messages."
       ]
     }
   ],
   "constraints": [
-    "Frontend user-facing labels must be in English.",
-    "Do not edit any files under `frontend/src/components/ui` (shadcn components are read-only).",
-    "Respect the existing role/onboarding gating logic in `AppShell.tsx` (public vs authenticated-not-onboarded vs onboarded vs admin)."
+    "Backend must remain a single Motoko actor with all logic in `backend/main.mo`.",
+    "Do not modify any frontend files under `frontend/src/components/ui` or other immutablePaths listed in SYSTEM_CONTEXT.",
+    "Use English for any user-facing text (confirmations, buttons, toasts, and error messages)."
   ],
   "nonGoals": [
-    "Do not change the Admin Dashboard tab structure or add new admin capabilities beyond providing a direct navigation entry to the existing profiles management tab.",
-    "Do not modify backend data models or authorization logic for profiles as part of this request."
+    "Do not add message editing functionality.",
+    "Do not add soft-delete/history/restore behavior; deletion may remain a hard delete as it is today.",
+    "Do not change the existing points rules related to posting/voting as part of this request."
   ],
   "imageRequirements": {
     "required": [],

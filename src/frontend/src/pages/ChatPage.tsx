@@ -1,17 +1,21 @@
 import { useState } from 'react';
-import { useGetApprovedMessages, usePostMessage } from '../hooks/useChat';
+import { useGetVisibleMessages, usePostMessage, useRemoveMessage } from '../hooks/useChat';
 import RequireAuth from '../components/auth/RequireAuth';
 import RequireOnboarding from '../components/auth/RequireOnboarding';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { MessageSquare, Send, ThumbsUp } from 'lucide-react';
+import { MessageSquare, Send, AlertCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import VoteButton from '../components/chat/VoteButton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuthState } from '../hooks/useAuthState';
 
 export default function ChatPage() {
-  const { data: messages, isLoading } = useGetApprovedMessages();
+  const { data: messages, isLoading, isError, refetch } = useGetVisibleMessages();
   const postMutation = usePostMessage();
+  const removeMutation = useRemoveMessage();
+  const { principal } = useAuthState();
   const [newMessage, setNewMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,6 +30,22 @@ export default function ChatPage() {
       console.error('Post error:', error);
       toast.error('Failed to post message. Please try again.');
     }
+  };
+
+  const handleDelete = async (messageId: bigint) => {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+
+    try {
+      await removeMutation.mutateAsync(messageId);
+      toast.success('Message deleted');
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete message. Please try again.');
+    }
+  };
+
+  const isMessageAuthor = (authorPrincipal: string) => {
+    return principal && authorPrincipal === principal;
   };
 
   return (
@@ -84,7 +104,22 @@ export default function ChatPage() {
 
             {/* Messages Feed */}
             <div className="space-y-4">
-              {isLoading ? (
+              {isError ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="flex items-center justify-between">
+                    <span>Failed to load messages. Please try again.</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => refetch()}
+                      className="ml-4"
+                    >
+                      Retry
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              ) : isLoading ? (
                 <div className="flex min-h-[40vh] items-center justify-center">
                   <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
                 </div>
@@ -99,21 +134,36 @@ export default function ChatPage() {
                   </CardContent>
                 </Card>
               ) : (
-                messages.map((message) => (
-                  <Card key={message.id.toString()}>
-                    <CardContent className="pt-6">
-                      <div className="mb-3 flex items-start justify-between gap-4">
-                        <p className="flex-1 text-foreground">{message.content}</p>
-                      </div>
-                      <div className="flex items-center justify-between border-t border-border pt-3">
-                        <span className="text-xs text-muted-foreground">
-                          {message.author.toString().slice(0, 8)}...
-                        </span>
-                        <VoteButton messageId={message.id} votes={message.votes} />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                messages.map((message) => {
+                  const isAuthor = isMessageAuthor(message.author.toString());
+                  
+                  return (
+                    <Card key={message.id.toString()}>
+                      <CardContent className="pt-6">
+                        <div className="mb-3 flex items-start justify-between gap-4">
+                          <p className="flex-1 text-foreground">{message.content}</p>
+                          {isAuthor && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDelete(message.id)}
+                              disabled={removeMutation.isPending}
+                              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between border-t border-border pt-3">
+                          <span className="text-xs text-muted-foreground">
+                            {message.author.toString().slice(0, 8)}...
+                          </span>
+                          <VoteButton messageId={message.id} votes={message.votes} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
               )}
             </div>
           </div>

@@ -16,7 +16,7 @@ export default function ChatModerationPanel() {
       toast.success('Message approved');
     } catch (error) {
       console.error('Approve error:', error);
-      toast.error('Failed to approve message');
+      toast.error('Failed to approve message. Please try again.');
     }
   };
 
@@ -28,7 +28,7 @@ export default function ChatModerationPanel() {
       toast.success('Message removed');
     } catch (error) {
       console.error('Remove error:', error);
-      toast.error('Failed to remove message');
+      toast.error('Failed to remove message. Please try again.');
     }
   };
 

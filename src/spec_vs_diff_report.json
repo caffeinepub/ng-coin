@@ -1,46 +1,70 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T21:32:42.596Z",
-  "summary": "The diff clearly adds an admin-only menu item labeled \"Profile Management\" that links to /admin with a search param tab=profiles in AppShell.tsx. However, because AppShell.tsx is truncated before the active-route logic and before the rendered desktop/mobile menus, the diff summary does not provide enough evidence to confirm that active highlighting works specifically for /admin?tab=profiles or that the entry appears in both desktop navigation and the mobile sheet menu.",
+  "generatedAt": "2026-02-09T22:26:16.657Z",
+  "summary": "Frontend changes add deletion handling in ChatPage and moderation panel, plus optimistic cache updates in the remove-message hook. Backend authorization change for author/admin deletion cannot be confirmed from the truncated backend diff. Several unrelated frontend features appear to have been changed per the frontend file summaries.",
   "missing_requirements": [
     {
-      "id": "REQ-51",
-      "requirement": "The \"Profile Management\" entry must appear in both the desktop navigation and the mobile sheet menu.",
-      "reason": "AppShell.tsx is truncated and does not show the JSX that renders desktop navigation and the mobile Sheet menu items, so presence in both menus cannot be verified from the provided diff summary.",
+      "id": "REQ-55",
+      "requirement": "Update the backend chat message deletion logic so that a message can be deleted by (a) the admin principal or (b) the original message author; all other callers must be rejected with an English unauthorized error; deleting a non-existent message must trap/reject with a clear English error.",
+      "reason": "The only backend file shown (backend/main.mo) is truncated and does not include the removeMessage implementation or any explicit authorization/non-existent-message error handling changes, so implementation cannot be verified from the provided diff summary.",
       "evidence": [
-        "frontend/src/components/layout/AppShell.tsx (truncated)"
+        "backend/main.mo (truncated; removeMessage not shown)"
       ]
     },
     {
-      "id": "REQ-51",
-      "requirement": "Active-route highlighting must work when the current URL is /admin?tab=profiles (the \"Profile Management\" entry is visually indicated as active).",
-      "reason": "The diff shows an isActiveRoute helper starting but it is truncated before any query-parameter comparison logic is visible; therefore, correct active-state handling for tab=profiles cannot be confirmed.",
+      "id": "REQ-56",
+      "requirement": "Add a delete control to the Live Guestbook UI (frontend/src/pages/ChatPage.tsx) so authenticated, onboarded users can delete their own messages from the visible feed; confirmation in English; update the feed immediately after success; show an English error message on failure.",
+      "reason": "ChatPage.tsx is truncated before the message feed rendering section, so it is not possible to confirm that a per-message delete control is shown only for the message author. Confirmation/toasts and calling removeMessage are shown, but the conditional UI control cannot be verified.",
       "evidence": [
-        "frontend/src/components/layout/AppShell.tsx (truncated)"
+        "frontend/src/pages/ChatPage.tsx (truncated; feed rendering/delete button not shown)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Updates to frontend-file-summaries.txt describing many unrelated code changes across numerous files (e.g., App.tsx loading gate removal, multiple hooks/pages changes).",
-      "reason": "BuildRequest only asked to add an admin-only \"Profile Management\" navigation entry in AppShell.tsx; modifying/adding broad project summaries (and especially claiming unrelated behavioral changes) was not requested.",
+      "description": "Removed a blocking loading gate in the main app router/rendering flow.",
+      "reason": "Not requested by REQ-55/56/57; appears as an unrelated application-level change in the diff summary.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend-file-summaries.txt (frontend/src/App.tsx summary)"
       ]
     },
     {
-      "description": "Update to project_state.json projectStateVersion/summary content.",
-      "reason": "BuildRequest did not request changes to project state metadata; only the navigation entry in AppShell.tsx was in scope.",
+      "description": "Added/changed authentication state helper hook (useAuthState) and related auth guard/login component behaviors beyond chat deletion.",
+      "reason": "Not requested by REQ-55/56/57; appears as unrelated auth refactor/addition.",
       "evidence": [
-        "project_state.json"
+        "frontend-file-summaries.txt (frontend/src/hooks/useAuthState.ts summary)",
+        "frontend-file-summaries.txt (frontend/src/components/auth/LoginButton.tsx summary)",
+        "frontend-file-summaries.txt (frontend/src/components/auth/RequireAuth.tsx summary)",
+        "frontend-file-summaries.txt (frontend/src/components/auth/RequireOnboarding.tsx summary)",
+        "frontend-file-summaries.txt (frontend/src/components/auth/RequireAdmin.tsx summary)"
+      ]
+    },
+    {
+      "description": "Implemented/changed a comprehensive role-adaptive navigation menu system and added an admin-only 'Profile Management' menu entry.",
+      "reason": "Not requested by REQ-55/56/57; appears as unrelated layout/navigation work.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/components/layout/AppShell.tsx summary)"
+      ]
+    },
+    {
+      "description": "Multiple unrelated page changes (LandingPage, OnboardingPage, MyProfilePage, CommunityDirectoryPage, etc.).",
+      "reason": "Not requested by REQ-55/56/57; appears as broader UX/content changes outside chat deletion scope.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/pages/LandingPage.tsx summary)",
+        "frontend-file-summaries.txt (frontend/src/pages/OnboardingPage.tsx summary)",
+        "frontend-file-summaries.txt (frontend/src/pages/MyProfilePage.tsx summary)",
+        "frontend-file-summaries.txt (frontend/src/pages/CommunityDirectoryPage.tsx summary)"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.64,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/layout/AppShell.tsx",
+    "frontend/src/components/admin/ChatModerationPanel.tsx",
+    "frontend/src/hooks/useChat.ts",
+    "frontend/src/pages/ChatPage.tsx",
     "project_state.json"
   ]
 }
